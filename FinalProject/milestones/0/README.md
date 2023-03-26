@@ -18,21 +18,26 @@ The first stage we learned in the software development life cycle is planning.
 
 ## Timeline
 
-- Date:
-	- Task/Milestone to be completed
-- Date:
-	- Task/Milestone to be completed
-- Date:
-	- Task/Milestone to be completed
-- Date:
-	- Task/Milestone to be completed
-- Date:
-	- Task/Milestone to be completed
-- Date:
-	- Task/Milestone to be completed
-- Date:
-	- Task/Milestone to be completed
-- Date:
-	- Task/Milestone to be completed
-- Date:
-	- Task/Milestone to be completed
+Mileston 1 : Backend Implementation (29th Mar - 2nd Apr)
+		- Date: 29th Mar
+			- Creating/updating all Sprint 1 tasks/User stories
+			- Adapting backend methods from assignment 6 - Basic drawing capability
+			- Adapting backend methods from assignment 6 - Change of color
+
+		- Date: 30th Mar
+			- Meet TA for check in
+
+		- Date: 2nd Apr
+			- Remaining backend methods - Stroke width
+			- Integrate backend methods with controller
+			- Sprint 2 planning
+
+Mileston 2 : Front end Implementation (3th Apr - 9th Apr)
+		- UI Design
+		- UI Implementation
+
+Mileston 3 : Collaborative painting feature Implementation (10th Apr - 16th Apr)
+
+Mileston 4 : Presentation Preparation and final touchups (17th Apr - 19th Apr)
+		
+		
