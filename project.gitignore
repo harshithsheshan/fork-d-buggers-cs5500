@@ -1,0 +1,11 @@
+# Here is a sample .gitignore file which will ignore any .o files that are generated.
+# Note that lines that start with a hash mark are comments.
+*.[o]
+*.[out]
+*.[app]
+*.[exe]
+*.[so]
+*.[dylib]
+*.[dll]
+
+# Note you could also type a specific file to ignore as well (e.g. a binary file)

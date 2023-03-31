@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/finalproject-team-d-buggers
+finalproject-team-d-buggers.so
+finalproject-team-d-buggers.dylib
+finalproject-team-d-buggers.dll
+finalproject-team-d-buggers.a
+finalproject-team-d-buggers.lib
+finalproject-team-d-buggers-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
