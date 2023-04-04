@@ -1,6 +1,10 @@
 import std.stdio;
 
-void main()
-{
-	writeln("Edit source/app.d to start your project.");
+import controller;
+
+
+void main(){
+  SDLApp myApp = new SDLApp();
+	myApp.MainApplicationLoop();
+	
 }

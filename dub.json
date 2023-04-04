@@ -2,8 +2,28 @@
 	"authors": [
 		"Harshith Sheshan"
 	],
+	"configurations": [
+		{
+			"name": "executable",
+			"targetType": "executable"
+		},
+		{
+			"excludedSourceFiles": [
+				"source/app.d"
+			],
+			"mainSourceFile": "bin/ut.d",
+			"name": "unittest",
+			"preBuildCommands": [
+				"dub run unit-threaded -c gen_ut_main -- -f bin/ut.d -d dub"
+			]
+		}
+	],
 	"copyright": "Copyright © 2023, Harshith Sheshan",
+	"dependencies": {
+		"bindbc-sdl": "~>1.3.0",
+		"unit-threaded": "~>2.1.3"
+	},
 	"description": "A minimal D application.",
 	"license": "proprietary",
-	"name": "finalproject-team-d-buggers"
+	"name":"project-d-buggers"
 }
