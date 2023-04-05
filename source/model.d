@@ -2,9 +2,12 @@ module surface;
 
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
+import std.file;
+import std.stdio;
+import std.array;
 
 class Surface{
-    
+
     SDL_Surface* imgSurface;
     //SDL_Window* window;
     int height;
@@ -19,13 +22,13 @@ class Surface{
   ~this(){
     // Free a surface...
         SDL_FreeSurface(imgSurface);
-        
+
   }
 
   auto getHeight(){
     return this.height;
   }
-    
+
   auto getWidth(){
     return this.width;
   }
@@ -45,7 +48,7 @@ class Surface{
         pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+2] = 32;
         SDL_UnlockSurface(imgSurface);
     }
-    
+
   // Check a pixel color
   // Some OtherFunction()
   auto GetPixelColor(int xPos,int yPos){
@@ -56,4 +59,13 @@ class Surface{
         auto rgb = [pixel_r,pixel_g,pixel_b];
         return rgb;
   }
+
+    void save()
+    {
+        const(char)* file = "DownloadedImage.bmp";
+        if (SDL_SaveBMP(imgSurface, file) == 1) {
+            writeln("Error occured while saving surface: ", SDL_GetError());
+        }
+    }
+
 }

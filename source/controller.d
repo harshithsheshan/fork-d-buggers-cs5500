@@ -97,6 +97,10 @@ class SDLApp{
                             s.UpdateSurfacePixel(xPos+w,yPos+h);
                         }
                     }
+                } else if (e.type == SDL_KEYDOWN) {
+                    if (e.key.keysym.sym == SDLK_LCTRL || e.key.keysym.sym == SDLK_RCTRL && e.key.keysym.sym == SDLK_s) {
+                        s.save();
+                    }
                 }
             }
 
@@ -111,6 +115,6 @@ class SDLApp{
         }
 
 
-    }           
+    }
         
 }
