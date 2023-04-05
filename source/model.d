@@ -5,6 +5,7 @@ import loader = bindbc.loader.sharedlib;
 import std.file;
 import std.stdio;
 import std.array;
+import std.string;
 
 class Surface{
 
@@ -60,10 +61,11 @@ class Surface{
         return rgb;
   }
 
-    void save()
+    // this is function to save the image in BMP format with the file name given by the user
+    void save(string fileName)
     {
-        const(char)* file = "DownloadedImage.bmp";
-        if (SDL_SaveBMP(imgSurface, file) == 1) {
+        const(char)* fileNameWithExt = toStringz(fileName ~ ".bmp");
+        if (SDL_SaveBMP(imgSurface, fileNameWithExt) == 1) {
             writeln("Error occured while saving surface: ", SDL_GetError());
         }
     }

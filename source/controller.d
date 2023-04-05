@@ -97,9 +97,11 @@ class SDLApp{
                             s.UpdateSurfacePixel(xPos+w,yPos+h);
                         }
                     }
-                } else if (e.type == SDL_KEYDOWN) {
+                } else if (e.type == SDL_KEYUP) {
                     if (e.key.keysym.sym == SDLK_LCTRL || e.key.keysym.sym == SDLK_RCTRL && e.key.keysym.sym == SDLK_s) {
-                        s.save();
+                        // Requesting user for file name
+                        writeln("Please enter file name:");
+                        s.save(readln.chomp());
                     }
                 }
             }
