@@ -99,7 +99,7 @@ class SDLApp{
                     }
                 } else if (e.type == SDL_KEYDOWN) {
                     if (e.key.keysym.sym == SDLK_LCTRL || e.key.keysym.sym == SDLK_RCTRL && e.key.keysym.sym == SDLK_s) {
-                        writeln("Save Activated");
+                        s.save();
                     }
                 }
             }
@@ -115,6 +115,6 @@ class SDLApp{
         }
 
 
-    }           
+    }
         
 }
