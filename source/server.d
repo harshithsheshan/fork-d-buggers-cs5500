@@ -5,6 +5,7 @@ module server;
 import std.socket;
 import std.stdio;
 import core.thread.osthread;
+import core.stdc.string;
 
 /// The purpose of the TCPServer is to accept
 /// multiple client connections. 
@@ -62,7 +63,14 @@ class TCPServer{
 
 						writeln("Friends on server = ",mClientsConnectedToServer.length);
 						// Let's send our new client friend a welcome message
-						newClientSocket.send("Hello friend\0");
+						//byte[] data = [1, 2, 3, 4];
+						//scope const(void)[] buffer = cast(const(void)*) data.ptr;
+						//scope const(void)[] buf = cast(const(void)[]) "hello world";
+						ubyte* data = cast(ubyte*) "Hello, world!";
+
+						// Create a slice of `const(void)*` from `data`
+						const void[] buffer = data[0..strlen(cast(char*) data)];
+						newClientSocket.send(buffer);
 
 						// Now we'll spawn a new thread for the client that
 						// has recently joined.
