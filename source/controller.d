@@ -129,6 +129,14 @@ class Client{
         SDL_Delay(16);
     }
 
+    void sendInsToServer(int xPos, int yPos){
+        // Format the integers into a string with the correct format
+        auto intString = format("%d %d", xPos, yPos);
+        // Concatenate the "_i" prefix with the formatted integers
+        auto buffer = "_i " ~ intString;
+        mSocket.send(buffer);
+    }
+
     void sendChatToServer(bool clientRunning){
         write(">");
         while(clientRunning){
@@ -139,12 +147,7 @@ class Client{
             }
             // Now we'll immedietely block and await data from the server
         }
-        SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
-        // Update the window surface
-        SDL_UpdateWindowSurface(v.window);
-        // Delay for 16 milliseconds
-        // Otherwise the program refreshes too quickly
-        SDL_Delay(16);
+
     }
 
     /// Purpose of this function is to receive data from the server as it is broadcast out. void receiveChatFromServer(){
@@ -204,6 +207,7 @@ class Client{
                             s.UpdateSurfacePixel(xPos+w,yPos+h);
                         }
                     }
+                    sendInsToServer(xPos,yPos);
                 }
             }
 
