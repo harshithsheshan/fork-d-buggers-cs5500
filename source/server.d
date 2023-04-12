@@ -113,6 +113,7 @@ class TCPServer{
             // NOTE: Probably want to make this a ring buffer,
             //       so that it does not grow infinitely.
             mServerData ~= buffer;
+            writeln("Buffer recieved:",buffer);
 
             /// After we receive a single message, we'll just
             /// immedietely broadcast out to all clients some data.
@@ -125,10 +126,10 @@ class TCPServer{
     /// messages to all of the clients that are currently
     /// connected.
     void broadcastToAllClients(){
-        writeln("Broadcasting to :", mClientsConnectedToServer.length);
         foreach(idx,serverToClient; mClientsConnectedToServer){
             // Send whatever the latest data was to all the
             // clients.
+            writeln("Broadcasting to :", idx);
             while(mCurrentMessageToSend[idx] <= mServerData.length-1){
                 char[80] msg = mServerData[mCurrentMessageToSend[idx]];
                 serverToClient.send(msg[0 .. 80]);
@@ -148,5 +149,5 @@ class TCPServer{
     /// use this to broadcast out to clients connected.
     char[80][] mServerData;
     /// Keeps track of the last message that was broadcast out to each client.
-    uint[] 			mCurrentMessageToSend;
+    uint[] mCurrentMessageToSend;
 }

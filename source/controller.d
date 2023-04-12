@@ -90,21 +90,28 @@ class Client{
             // 			 get previous data leftover in the buffer.
             char[80] buffer;
             auto fromServer = buffer[0 .. mSocket.receive(buffer)];
+            writeln("Recieved buffer",fromServer);
             auto str = to!string(fromServer);
-            if(str.length > 0){
+            writeln("Printing raw",str);
+
+            if(true){
                 if (str.startsWith("_i"))
                 {
+                    writeln("Debug has _i");
                     // Split the string into words using whitespace as the delimiter
-                    auto parts = str.splitter(' ');
+                    auto parts = str.split(' ');
+                    //writeln("printing split", parts[0 .. $]);
                     // Move to the second part of the split (the first integer)
-                    parts.popFront();
+                    //writeln("parts: ", parts[0 .. $]);
+                    //parts.popFront();
                     // Extract the first integer
-                    auto xPos = parts.front.to!int;
+                    auto xPos = to!int(parts[1]);
                     // Move to the third part of the split (the second integer)
-                    parts.popFront();
-                    parts.popFront();
+                    //parts.popFront();
+                    //parts.popFront();
                     // Extract the second integer
-                    auto yPos = parts.front.to!int;
+                    auto yPos = to!int(parts[2]);
+                    write("Debug extracted x and y");
                     this.perform(xPos,yPos);
                 }
                 else {
@@ -115,6 +122,7 @@ class Client{
     }
 
     void perform(int xPos, int yPos){
+        writeln("Got instructions for pixel %d %d".format(xPos,yPos));
         int brushSize=4;
         for(int w=-brushSize; w < brushSize; w++){
             for(int h=-brushSize; h < brushSize; h++){
@@ -124,16 +132,17 @@ class Client{
         SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
         // Update the window surface
         SDL_UpdateWindowSurface(v.window);
-        // Delay for 16 milliseconds
+        // Delay f_ior 16 milliseconds
         // Otherwise the program refreshes too quickly
         SDL_Delay(16);
     }
 
     void sendInsToServer(int xPos, int yPos){
         // Format the integers into a string with the correct format
-        auto intString = format("%d %d", xPos, yPos);
+        auto intString = format("%d %d ", xPos, yPos);
         // Concatenate the "_i" prefix with the formatted integers
         auto buffer = "_i " ~ intString;
+        write("auto instruction:",buffer);
         mSocket.send(buffer);
     }
 
@@ -171,6 +180,7 @@ class Client{
             sendChatToServer(clientRunning);
         }).start();
 
+
         bool runApplication = true;
         // Flag for determining if we are 'drawing' (i.e. mouse has been pressed
         //                                                but not yet released)
@@ -207,7 +217,7 @@ class Client{
                             s.UpdateSurfacePixel(xPos+w,yPos+h);
                         }
                     }
-                    sendInsToServer(xPos,yPos);
+                    this.sendInsToServer(xPos,yPos);
                 }
             }
 
