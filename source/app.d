@@ -23,11 +23,11 @@ void main(string[] args){
 			server.run();
 		}
 		else if( args[1] == "client"){
-			TCPClient client = new TCPClient();
+			Client client = new Client();
 			client.run();
 		}
-	  SDLApp myApp = new SDLApp();
-		myApp.MainApplicationLoop();
+		//Client myApp = new Client();
+		//myApp.MainApplicationLoop();
 	}
 	//SDLApp myApp = new SDLApp();
 	//myApp.MainApplicationLoop();

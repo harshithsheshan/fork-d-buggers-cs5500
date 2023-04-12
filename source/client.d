@@ -4,6 +4,7 @@
 // then start as many clients as you like with "rdmd client.d"
 //
 module client;
+
 import std.socket;
 import std.stdio;
 import core.thread.osthread;
@@ -53,8 +54,9 @@ class TCPClient{
 		bool clientRunning=true;
 		
 		// Spin up the new thread that will just take in data from the server
+
 		new Thread({
-					receiveDataFromServer();
+			receiveChatFromServer();
 				}).start();
 	
 		write(">");
@@ -70,8 +72,10 @@ class TCPClient{
 	}
 
 
+
+
 	/// Purpose of this function is to receive data from the server as it is broadcast out.
-	void receiveDataFromServer(){
+	void receiveChatFromServer(){
 		while(true){	
 			// Note: It's important to recreate or 'zero out' the buffer so that you do not
 			// 			 get previous data leftover in the buffer.

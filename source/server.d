@@ -5,24 +5,18 @@ module server;
 import std.socket;
 import std.stdio;
 import core.thread.osthread;
-import core.stdc.string;
 
 /// The purpose of the TCPServer is to accept
-/// multiple client connections. 
+/// multiple client connections.
 /// Every client that connects will have its own thread
 /// for the server to broadcast information to each client.
 class TCPServer{
     /// Constructor
     /// By default I have choosen localhost and a port that is likely to
     /// be free.
-
-    Surface s;
-    SDL_Surface* sdlSurface;
-    SDLSupport ret;
-    ubyte[] pixelByteArr;
-
     this(string host = "localhost", ushort port=50001, ushort maxConnectionsBacklog=4){
-        initializeSDL();
+        writeln("Starting server...");
+        writeln("Server must be started before clients may join");
         // Note: AddressFamily.INET tells us we are using IPv4 Internet protocol
         // Note: SOCK_STREAM (SocketType.STREAM) creates a TCP Socket
         //       If you want UDPClient and UDPServer use 'SOCK_DGRAM' (SocketType.DGRAM)
@@ -42,72 +36,6 @@ class TCPServer{
         // Close our server listening socket
         // TODO: If it was never opened, no need to call close
         mListeningSocket.close();
-    }
-
-    void initializeSDL() {
-        // Handle initialization...
-        // SDL_Init
-        version(Windows){
-            writeln("Searching for SDL on Windows");
-            ret = loadSDL("SDL2.dll");
-        }
-        version(OSX){
-            writeln("Searching for SDL on Mac");
-            ret = loadSDL();
-        }
-        version(linux){
-            writeln("Searching for SDL on Linux");
-            ret = loadSDL();
-        }
-
-        // Error if SDL cannot be loaded
-        if(ret != sdlSupport){
-            writeln("error loading SDL library");
-
-            foreach( info; loader.errors){
-                writeln(info.error,':', info.message);
-            }
-        }
-        if(ret == SDLSupport.noLibrary){
-            writeln("error no library found");
-        }
-        if(ret == SDLSupport.badLibrary){
-            writeln("Eror badLibrary, missing symbols, perhaps an older or very new version of SDL is causing the problem?");
-        }
-        if(SDL_Init(SDL_INIT_EVERYTHING) !=0){
-            writeln("SDL_Init: ", fromStringz(SDL_GetError()));
-        }
-        s = new Surface();
-        sdlSurface = SDL_CreateRGBSurface(0,640,480,32,0,0,0,0);
-        writeln("look here", sdlSurface.pitch * sdlSurface.h);
-        pixelByteArr = new ubyte[sdlSurface.pitch * sdlSurface.h];
-        if (sdlSurface is null) {
-            writeln("Failed to create canvas surface: ", SDL_GetError());
-            return;
-        }
-    }
-
-    void sendInitialCanvasDataToClient() {
-        auto pixelData = getCanvasPixelData();
-
-        for (auto j = 0; j < sdlSurface.pitch * sdlSurface.h; j++) {
-            pixelByteArr[j] = pixelData[j];
-        }
-
-        broadcastCanvasToAllClients();
-    }
-
-    //helper method because we will reuse this at many places in future
-    auto getCanvasPixelData() {
-        return cast(ubyte*) sdlSurface.pixels;
-    }
-
-    //helper method because we will reuse this at many places in future
-    void broadcastCanvasToAllClients() {
-        foreach (client; mClientsConnectedToServer)
-        {
-            client.send(pixelByteArr);
-        }
     }
 
     /// Call this after the server has been created
@@ -133,14 +61,8 @@ class TCPServer{
             mCurrentMessageToSend ~= 0;
 
             writeln("Friends on server = ",mClientsConnectedToServer.length);
-
-            //ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
-            //const void[] buffer = pixelArray[0..strlen(cast(char*) pixelArray)];
-            //newClientSocket.send(buffer);
-
-
-            // sending data to clients
-            sendInitialCanvasDataToClient();
+            // Let's send our new client friend a welcome message
+            newClientSocket.send("Hello friend\0");
 
             // Now we'll spawn a new thread for the client that
             // has recently joined.
@@ -170,18 +92,18 @@ class TCPServer{
 
         while(runThreadLoop){
             // Check if the socket isAlive
-            if (!clientSocket.isAlive){
+            if(!clientSocket.isAlive){
                 // Then remove the socket
                 runThreadLoop=false;
-                break ;
+                break;
             }
 
             // Message buffer will be 80 bytes
-            //char[80] buffer;
+            char[80] buffer;
             // Server is now waiting to handle data from specific client
             // We'll block the server awaiting to receive a message.
-            auto got = clientSocket.receive(pixelByteArr);
-            writeln("(incoming data from client) ", pixelByteArr[0 .. $]);
+            auto got = clientSocket.receive(buffer);
+            writeln("Received some data (bytes): ",got);
             // TODO: Note, you might want to verify 'got'
             //       is infact 80 bytes
 
@@ -190,11 +112,11 @@ class TCPServer{
             // data structure.
             // NOTE: Probably want to make this a ring buffer,
             //       so that it does not grow infinitely.
-           // mServerData ~= buffer;
+            mServerData ~= buffer;
 
             /// After we receive a single message, we'll just
             /// immedietely broadcast out to all clients some data.
-           // broadcastToAllClients();
+            broadcastToAllClients();
         }
 
     }
@@ -204,7 +126,7 @@ class TCPServer{
     /// connected.
     void broadcastToAllClients(){
         writeln("Broadcasting to :", mClientsConnectedToServer.length);
-        foreach (idx,serverToClient; mClientsConnectedToServer){
+        foreach(idx,serverToClient; mClientsConnectedToServer){
             // Send whatever the latest data was to all the
             // clients.
             while(mCurrentMessageToSend[idx] <= mServerData.length-1){
@@ -218,13 +140,13 @@ class TCPServer{
     }
 
     /// The listening socket is responsible for handling new client connections.
-    Socket        mListeningSocket;
+    Socket 		mListeningSocket;
     /// Stores the clients that are currently connected to the server.
-    Socket[]    mClientsConnectedToServer;
+    Socket[] 	mClientsConnectedToServer;
 
     /// Stores all of the data on the server. Ideally, we'll
     /// use this to broadcast out to clients connected.
     char[80][] mServerData;
     /// Keeps track of the last message that was broadcast out to each client.
-    uint[]            mCurrentMessageToSend;
+    uint[] 			mCurrentMessageToSend;
 }
