@@ -8,6 +8,7 @@ import std.conv;
 import std.exception;
 import std.socket;
 import core.thread.osthread;
+import std.algorithm;
 
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
@@ -89,10 +90,43 @@ class Client{
             // 			 get previous data leftover in the buffer.
             char[80] buffer;
             auto fromServer = buffer[0 .. mSocket.receive(buffer)];
-            if(fromServer.length > 0){
-                writeln("(from server)>",fromServer);
+            auto str = to!string(fromServer);
+            if(str.length > 0){
+                if (str.startsWith("_i"))
+                {
+                    // Split the string into words using whitespace as the delimiter
+                    auto parts = str.splitter(' ');
+                    // Move to the second part of the split (the first integer)
+                    parts.popFront();
+                    // Extract the first integer
+                    auto xPos = parts.front.to!int;
+                    // Move to the third part of the split (the second integer)
+                    parts.popFront();
+                    parts.popFront();
+                    // Extract the second integer
+                    auto yPos = parts.front.to!int;
+                    this.perform(xPos,yPos);
+                }
+                else {
+                    writeln("(from server)>",fromServer);
+                }
             }
         }
+    }
+
+    void perform(int xPos, int yPos){
+        int brushSize=4;
+        for(int w=-brushSize; w < brushSize; w++){
+            for(int h=-brushSize; h < brushSize; h++){
+                s.UpdateSurfacePixel(xPos+w,yPos+h);
+            }
+        }
+        SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
+        // Update the window surface
+        SDL_UpdateWindowSurface(v.window);
+        // Delay for 16 milliseconds
+        // Otherwise the program refreshes too quickly
+        SDL_Delay(16);
     }
 
     void sendChatToServer(bool clientRunning){
@@ -105,11 +139,15 @@ class Client{
             }
             // Now we'll immedietely block and await data from the server
         }
+        SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
+        // Update the window surface
+        SDL_UpdateWindowSurface(v.window);
+        // Delay for 16 milliseconds
+        // Otherwise the program refreshes too quickly
+        SDL_Delay(16);
     }
 
     /// Purpose of this function is to receive data from the server as it is broadcast out. void receiveChatFromServer(){
-
-
     /// The client socket connected to a server
 
     void run(){
