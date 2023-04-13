@@ -64,6 +64,10 @@ class TCPServer{
             // Let's send our new client friend a welcome message
             newClientSocket.send("Hello friend\0");
 
+            if ( mServerData.length > 1) {
+                broadcastToAllClients();
+            }
+
             // Now we'll spawn a new thread for the client that
             // has recently joined.
             // The server will now be running multiple threads and
