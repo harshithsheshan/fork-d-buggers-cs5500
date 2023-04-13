@@ -197,14 +197,14 @@ class Client{
             // been pushed into the internal SDL queue. Thus, we poll until there
             // are '0' events or a NULL event is returned.
             while(SDL_PollEvent(&e) !=0){
-                if(e.type == SDL_QUIT){
+                if (e.type == SDL_QUIT){
                     runApplication= false;
                 }
-                else if(e.type == SDL_MOUSEBUTTONDOWN){
+                else if (e.type == SDL_MOUSEBUTTONDOWN){
                     drawing=true;
-                }else if(e.type == SDL_MOUSEBUTTONUP){
+                }else if (e.type == SDL_MOUSEBUTTONUP){
                     drawing=false;
-                }else if(e.type == SDL_MOUSEMOTION && drawing){
+                }else if (e.type == SDL_MOUSEMOTION && drawing){
                     // retrieve the position
                     int xPos = e.button.x;
                     int yPos = e.button.y;
@@ -212,17 +212,25 @@ class Client{
                     // NOTE: No bounds checking performed --
                     //       think about how you might fix this :)
                     int brushSize=4;
-                    for(int w=-brushSize; w < brushSize; w++){
-                        for(int h=-brushSize; h < brushSize; h++){
+                    for (int w=-brushSize; w < brushSize; w++){
+                        for (int h=-brushSize; h < brushSize; h++){
                             s.UpdateSurfacePixel(xPos+w,yPos+h);
                         }
                     }
                     this.sendInsToServer(xPos,yPos);
-                } else if (e.type == SDL_KEYUP) {
-                    if (e.key.keysym.sym == SDLK_LCTRL || e.key.keysym.sym == SDLK_RCTRL && e.key.keysym.sym == SDLK_s) {
-                        // Requesting user for file name
-                        writeln("Please enter file name:");
-                        s.save(readln.chomp());
+                } else if (e.type == SDL_KEYDOWN) {
+                    if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
+                        if (e.key.keysym.sym == SDLK_s) {
+                            // Requesting user for file name
+                            //writeln("Please enter file name:");
+                            //s.save(readln.chomp());
+                            s.save();
+                        } else if(e.key.keysym.sym == SDLK_o) {
+                            // Requesting user for file name
+                            //writeln("Please enter file name:");
+                            //s.open(readln.chomp());
+                            s.open();
+                        }
                     }
                 }
             }

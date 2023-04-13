@@ -10,6 +10,8 @@ import std.string;
 class Surface{
 
     SDL_Surface* imgSurface;
+    const string DEFAULT_FILENAME = "savedImage";
+
     //SDL_Window* window;
     int height;
     int width;
@@ -62,12 +64,29 @@ class Surface{
   }
 
     // this is function to save the image in BMP format with the file name given by the user
-    void save(string fileName)
+    //bool save(string fileName)
+    bool save()
     {
-        const(char)* fileNameWithExt = toStringz(fileName ~ ".bmp");
+        const(char)* fileNameWithExt = toStringz(DEFAULT_FILENAME ~ ".bmp");
         if (SDL_SaveBMP(imgSurface, fileNameWithExt) == 1) {
             writeln("Error occured while saving surface: ", SDL_GetError());
+            return false;
         }
+        return true;
+    }
+
+    // this is function to save the image in BMP format with the file name given by the user
+    //bool open(string fileName)
+    bool open()
+    {
+        const(char)* fileNameWithExt = toStringz(DEFAULT_FILENAME ~ ".bmp");
+        SDL_Surface* newImage = SDL_LoadBMP(fileNameWithExt);
+        if (newImage == null) {
+            writeln("Error occured while opening imaage ", SDL_GetError());
+            return false;
+        }
+        imgSurface = newImage;
+        return true;
     }
 
 }
