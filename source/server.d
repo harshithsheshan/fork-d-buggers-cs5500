@@ -134,7 +134,7 @@ class TCPServer{
             // Send whatever the latest data was to all the
             // clients.
             writeln("Broadcasting to :", idx);
-            while(mCurrentMessageToSend[idx] <= mServerData.length-1){
+            while(serverToClient.isAlive && mCurrentMessageToSend[idx] <= mServerData.length-1){
                 char[80] msg = mServerData[mCurrentMessageToSend[idx]];
                 serverToClient.send(msg[0 .. 80]);
                 // Important to increment the message only after sending

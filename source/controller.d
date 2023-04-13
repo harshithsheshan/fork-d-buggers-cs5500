@@ -106,7 +106,7 @@ class Client{
                     //parts.popFront();
                     // Extract the first integer
                     if (parts[1] == "open"){
-                        writeln(parts[1]);
+                        writeln("received request to open ", parts[1]);
                         s.open();
                     }
                     else {
