@@ -129,12 +129,12 @@ class Client{
                 s.UpdateSurfacePixel(xPos+w,yPos+h);
             }
         }
-        SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
+        //SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
         // Update the window surface
-        SDL_UpdateWindowSurface(v.window);
+        //SDL_UpdateWindowSurface(v.window);
         // Delay f_ior 16 milliseconds
         // Otherwise the program refreshes too quickly
-        SDL_Delay(16);
+        //SDL_Delay(16);
     }
 
     void sendInsToServer(int xPos, int yPos){
