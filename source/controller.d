@@ -66,7 +66,7 @@ class Client{
         char[80] buffer;
         auto received = mSocket.receive(buffer);
         writeln("(incoming from server) ", buffer[0 .. received]);
-        writeln("Buffer printed");
+        //writeln("Buffer printed");
         s = new Surface();
         v = new View(s);
     }
@@ -90,14 +90,14 @@ class Client{
             // 			 get previous data leftover in the buffer.
             char[80] buffer;
             auto fromServer = buffer[0 .. mSocket.receive(buffer)];
-            writeln("Recieved buffer",fromServer);
+            //writeln("Recieved buffer",fromServer);
             auto str = to!string(fromServer);
-            writeln("Printing raw",str);
+            //writeln("Printing raw",str);
 
             if(true){
                 if (str.startsWith("_i"))
                 {
-                    writeln("Debug has _i");
+                    //writeln("Debug has _i");
                     // Split the string into words using whitespace as the delimiter
                     auto parts = str.split(' ');
                     //writeln("printing split", parts[0 .. $]);
@@ -105,14 +105,20 @@ class Client{
                     //writeln("parts: ", parts[0 .. $]);
                     //parts.popFront();
                     // Extract the first integer
-                    auto xPos = to!int(parts[1]);
-                    // Move to the third part of the split (the second integer)
-                    //parts.popFront();
-                    //parts.popFront();
-                    // Extract the second integer
-                    auto yPos = to!int(parts[2]);
-                    write("Debug extracted x and y");
-                    this.perform(xPos,yPos);
+                    if (parts[1] == "open"){
+                        writeln(parts[1]);
+                        s.open();
+                    }
+                    else {
+                        auto xPos = to!int(parts[1]);
+                        // Move to the third part of the split (the second integer)
+                        //parts.popFront();
+                        //parts.popFront();
+                        // Extract the second integer
+                        auto yPos = to!int(parts[2]);
+                        //write("Debug extracted x and y");
+                        this.perform(xPos,yPos);
+                    }
                 }
                 else {
                     writeln("(from server)>",fromServer);
@@ -142,7 +148,12 @@ class Client{
         auto intString = format("%d %d ", xPos, yPos);
         // Concatenate the "_i" prefix with the formatted integers
         auto buffer = "_i " ~ intString;
-        write("auto instruction:",buffer);
+        //write("auto instruction:",buffer);
+        mSocket.send(buffer);
+    }
+
+    void sendOpenToServer(){
+        auto buffer = "_i open ";
         mSocket.send(buffer);
     }
 
@@ -230,6 +241,7 @@ class Client{
                             //writeln("Please enter file name:");
                             //s.open(readln.chomp());
                             s.open();
+                            this.sendOpenToServer();
                         }
                     }
                 }
