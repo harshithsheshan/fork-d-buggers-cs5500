@@ -128,7 +128,7 @@ class Client{
     }
 
     void perform(int xPos, int yPos){
-        writeln("Got instructions for pixel %d %d".format(xPos,yPos));
+        //writeln("Got instructions for pixel %d %d".format(xPos,yPos));
         s.draw(xPos,yPos,0,0);
         //SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
         // Update the window surface
@@ -255,7 +255,7 @@ class Client{
                     // NOTE: No bounds checking performed --
                     //       think about how you might fix this :)
                     int brushSize=4;
-                    s.draw(xPos,yPos,1,0);
+                    s.draw(xPos,yPos,0,1);
                     this.sendInsToServer(xPos,yPos);
                 } else if (e.type == SDL_KEYDOWN) {
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {

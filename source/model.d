@@ -236,6 +236,7 @@ class Surface{
 
 	void undo(){
 		if (pos > 0){
+      ubyte[] color = GetSetColor();
 			ulong r1 = queuePos[pos-1];
 			ulong r2 = queue.length;
 			if (pos < queuePos.length) {
@@ -246,12 +247,13 @@ class Surface{
 				UpdateSurfacePixel(queue[i], queue[i+1]);
 			}
 			pos--;
-			changeColor(red, green, blue);
+			changeColor(color[0], color[1], color[2]);
 		}
 	}
 
 	void redo(){
 		if (pos < queuePos.length){
+      ubyte[] color = GetSetColor();
 			ulong r1 = 0;
 			ulong r2 = 0;
 			if (pos > 0) {
@@ -267,7 +269,7 @@ class Surface{
 				UpdateSurfacePixel(queue[i], queue[i+1]);
 			}
 			pos++;
-			changeColor(red, green, blue);
+			changeColor(color[0], color[1], color[2]);
 		}
 	}
 
@@ -292,14 +294,27 @@ class Surface{
 			for(int h=-brushSize; h < brushSize; h++){
 				if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
 					ubyte[] color = GetPixelColor(xPos+w,yPos+h);
-					//if(color[0] != red || color[1] != green || color[2] != blue){
+					if(color[0] != red || color[1] != green || color[2] != blue){
             if (addQueue == 1) {
               queue.insertBack(xPos+w);
               queue.insertBack(yPos+h);
               queue.insertBack(GetPixelColor(xPos+w,yPos+h));
             }
 						UpdateSurfacePixel(xPos+w,yPos+h);
-					//}
+					}
+				}
+			}
+		}
+	}
+
+  void drawOther(int xPos, int yPos, int r, int g, int b, int size){
+		for(int w=-brushSize; w < size; w++){
+			for(int h=-brushSize; h < size; h++){
+				if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
+					ubyte[] color = GetPixelColor(xPos+w,yPos+h);
+					if(color[0] != r || color[1] != g || color[2] != b){
+						UpdateSurfacePixel(xPos+w,yPos+h);
+					}
 				}
 			}
 		}
