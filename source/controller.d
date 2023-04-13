@@ -129,12 +129,7 @@ class Client{
 
     void perform(int xPos, int yPos){
         writeln("Got instructions for pixel %d %d".format(xPos,yPos));
-        int brushSize=4;
-        for(int w=-brushSize; w < brushSize; w++){
-            for(int h=-brushSize; h < brushSize; h++){
-                s.UpdateSurfacePixel(xPos+w,yPos+h);
-            }
-        }
+        s.draw(xPos,yPos,0,0);
         //SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
         // Update the window surface
         //SDL_UpdateWindowSurface(v.window);
@@ -197,6 +192,9 @@ class Client{
         //                                                but not yet released)
         bool drawing = false;
 
+        s.drawMenu();
+		int size = s.getMenuSize();
+
         // Main application loop that will run until a quit event has occurred.
         // This is the 'main graphics loop'
         while(runApplication){
@@ -212,8 +210,42 @@ class Client{
                     runApplication= false;
                 }
                 else if (e.type == SDL_MOUSEBUTTONDOWN){
-                    drawing=true;
+                    int xPos = e.button.x;
+					int yPos = e.button.y;
+
+					if (yPos < 8*size){
+						if (yPos < 7*size){
+							if (xPos < 17*size){
+                                s.save();
+								writeln("save");
+							} else if (xPos < 25*size && xPos >= 18*size){
+								s.undo();
+								//writeln("undo");
+							} else if (xPos < 33*size && xPos >= 26*size){
+								s.redo();
+								//writeln("redo");
+							} else if (xPos < 41*size && xPos >= 34*size){
+								s.brushDecrease();
+								//writeln("decrease");
+							} else if (xPos < 49*size && xPos >= 42*size){
+								s.brushIncrease();
+								//writeln("increase");
+							} else if (xPos >= 51*size){
+								if ((xPos-(51*size)) % (8*size) < 6*size) {
+									ubyte[] color = s.GetPixelColor(xPos,yPos);
+									s.changeColor(color[0], color[1], color[2]);
+									//writeln("color ", (xPos-(51*size)) / (8*size));
+								}
+							}
+						}
+					} else {
+						drawing=true;
+						s.draw(xPos,yPos,1,1);
+					}
                 }else if (e.type == SDL_MOUSEBUTTONUP){
+                    if (drawing){
+						s.posIncrease();
+					}
                     drawing=false;
                 }else if (e.type == SDL_MOUSEMOTION && drawing){
                     // retrieve the position
@@ -223,11 +255,7 @@ class Client{
                     // NOTE: No bounds checking performed --
                     //       think about how you might fix this :)
                     int brushSize=4;
-                    for (int w=-brushSize; w < brushSize; w++){
-                        for (int h=-brushSize; h < brushSize; h++){
-                            s.UpdateSurfacePixel(xPos+w,yPos+h);
-                        }
-                    }
+                    s.draw(xPos,yPos,1,0);
                     this.sendInsToServer(xPos,yPos);
                 } else if (e.type == SDL_KEYDOWN) {
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
