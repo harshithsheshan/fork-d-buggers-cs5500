@@ -1,6 +1,6 @@
 module controller;
 
-public import surface;
+public import model;
 public import view;
 import std.stdio;
 import std.string;

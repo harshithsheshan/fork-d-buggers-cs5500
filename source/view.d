@@ -1,6 +1,6 @@
 module view;
 
-public import surface;
+public import model;
 
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;

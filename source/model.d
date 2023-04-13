@@ -1,4 +1,4 @@
-module surface;
+module model;
 
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;

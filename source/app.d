@@ -1,7 +1,6 @@
 import std.stdio;
 import controller;
 public import server;
-public import client;
 
 
 
