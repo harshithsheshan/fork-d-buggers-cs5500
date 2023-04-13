@@ -218,6 +218,12 @@ class Client{
                         }
                     }
                     this.sendInsToServer(xPos,yPos);
+                } else if (e.type == SDL_KEYUP) {
+                    if (e.key.keysym.sym == SDLK_LCTRL || e.key.keysym.sym == SDLK_RCTRL && e.key.keysym.sym == SDLK_s) {
+                        // Requesting user for file name
+                        writeln("Please enter file name:");
+                        s.save(readln.chomp());
+                    }
                 }
             }
 
@@ -233,6 +239,5 @@ class Client{
 
 
     }
-
         
 }
