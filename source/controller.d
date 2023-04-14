@@ -111,13 +111,13 @@ class Client{
                     }
                     else {
                         auto xPos = to!int(parts[1]);
-                        // Move to the third part of the split (the second integer)
-                        //parts.popFront();
-                        //parts.popFront();
-                        // Extract the second integer
                         auto yPos = to!int(parts[2]);
-                        //write("Debug extracted x and y");
-                        this.perform(xPos,yPos);
+                        auto r = to!ubyte(parts[3]);
+                        auto g = to!ubyte(parts[4]);
+                        auto b = to!ubyte(parts[5]);
+                        auto brushSize = to!int(parts[6]);
+                        writeln("performing : at %d %d %u %u %u %d".format(xPos,yPos,r,g,b,brushSize));
+                        this.perform(xPos,yPos,r,g,b,brushSize);
                     }
                 }
                 else {
@@ -127,25 +127,16 @@ class Client{
         }
     }
 
-    void perform(int xPos, int yPos){
-        writeln("Got instructions for pixel %d %d".format(xPos,yPos));
-        int brushSize=4;
-        for(int w=-brushSize; w < brushSize; w++){
-            for(int h=-brushSize; h < brushSize; h++){
-                s.UpdateSurfacePixel(xPos+w,yPos+h);
-            }
-        }
-        //SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
-        // Update the window surface
-        //SDL_UpdateWindowSurface(v.window);
-        // Delay f_ior 16 milliseconds
-        // Otherwise the program refreshes too quickly
-        //SDL_Delay(16);
+    void perform(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
+        //writeln("Got instructions for pixel %d %d".format(xPos,yPos));
+        //s.draw(xPos,yPos,0,0);
+        s.drawOther(xPos,yPos,r,g,b,brushSize);
+
     }
 
-    void sendInsToServer(int xPos, int yPos){
+    void sendInsToServer(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
         // Format the integers into a string with the correct format
-        auto intString = format("%d %d ", xPos, yPos);
+        auto intString = format("%d %d %u %u %u %d ", xPos, yPos, r, g, b, brushSize);
         // Concatenate the "_i" prefix with the formatted integers
         auto buffer = "_i " ~ intString;
         //write("auto instruction:",buffer);
@@ -197,10 +188,13 @@ class Client{
         //                                                but not yet released)
         bool drawing = false;
 
+        s.drawMenu();
+		int size = s.getMenuSize();
+
         // Main application loop that will run until a quit event has occurred.
         // This is the 'main graphics loop'
         while(runApplication){
-        
+
             SDL_Event e;
             // Handle events
             // Events are pushed into an 'event queue' internally in SDL, and then
@@ -212,8 +206,45 @@ class Client{
                     runApplication= false;
                 }
                 else if (e.type == SDL_MOUSEBUTTONDOWN){
-                    drawing=true;
+                    int xPos = e.button.x;
+					int yPos = e.button.y;
+
+					if (yPos < 8*size){
+						if (yPos < 7*size){
+							if (xPos < 17*size){
+                                s.save();
+								writeln("save");
+							} else if (xPos < 25*size && xPos >= 18*size){
+								s.undo();
+								//writeln("undo");
+							} else if (xPos < 33*size && xPos >= 26*size){
+								s.redo();
+								//writeln("redo");
+							} else if (xPos < 41*size && xPos >= 34*size){
+								s.brushDecrease();
+								//writeln("decrease");
+							} else if (xPos < 49*size && xPos >= 42*size){
+								s.brushIncrease();
+								//writeln("increase");
+							} else if (xPos >= 51*size){
+								if ((xPos-(51*size)) % (8*size) < 6*size) {
+									ubyte[] color = s.GetPixelColor(xPos,yPos);
+									s.changeColor(color[0], color[1], color[2]);
+									//writeln("color ", (xPos-(51*size)) / (8*size));
+								}
+							}
+						}
+					} else {
+						drawing=true;
+						s.draw(xPos,yPos,1,1);
+                        auto rgb = s.GetSetColor();
+                        auto brushSize = s.getBrushSize();
+                        this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
+					}
                 }else if (e.type == SDL_MOUSEBUTTONUP){
+                    if (drawing){
+						s.posIncrease();
+					}
                     drawing=false;
                 }else if (e.type == SDL_MOUSEMOTION && drawing){
                     // retrieve the position
@@ -222,13 +253,11 @@ class Client{
                     // Loop through and update specific pixels
                     // NOTE: No bounds checking performed --
                     //       think about how you might fix this :)
-                    int brushSize=4;
-                    for (int w=-brushSize; w < brushSize; w++){
-                        for (int h=-brushSize; h < brushSize; h++){
-                            s.UpdateSurfacePixel(xPos+w,yPos+h);
-                        }
-                    }
-                    this.sendInsToServer(xPos,yPos);
+                    s.draw(xPos,yPos,0,1);
+                    // TODO Add colour and brush size
+                    auto rgb = s.GetSetColor();
+                    auto brushSize = s.getBrushSize();
+                    this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
                 } else if (e.type == SDL_KEYDOWN) {
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
                         if (e.key.keysym.sym == SDLK_s) {
@@ -259,5 +288,5 @@ class Client{
 
 
     }
-        
+
 }
