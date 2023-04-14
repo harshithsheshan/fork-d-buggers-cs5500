@@ -111,13 +111,13 @@ class Client{
                     }
                     else {
                         auto xPos = to!int(parts[1]);
-                        // Move to the third part of the split (the second integer)
-                        //parts.popFront();
-                        //parts.popFront();
-                        // Extract the second integer
                         auto yPos = to!int(parts[2]);
-                        //write("Debug extracted x and y");
-                        this.perform(xPos,yPos);
+                        auto r = to!ubyte(parts[3]);
+                        auto g = to!ubyte(parts[4]);
+                        auto b = to!ubyte(parts[5]);
+                        auto brushSize = to!int(parts[6]);
+                        writeln("performing : at %d %d %u %u %u %d".format(xPos,yPos,r,g,b,brushSize));
+                        this.perform(xPos,yPos,r,g,b,brushSize);
                     }
                 }
                 else {
@@ -127,20 +127,16 @@ class Client{
         }
     }
 
-    void perform(int xPos, int yPos){
+    void perform(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
         //writeln("Got instructions for pixel %d %d".format(xPos,yPos));
-        s.draw(xPos,yPos,0,0);
-        //SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
-        // Update the window surface
-        //SDL_UpdateWindowSurface(v.window);
-        // Delay f_ior 16 milliseconds
-        // Otherwise the program refreshes too quickly
-        //SDL_Delay(16);
+        //s.draw(xPos,yPos,0,0);
+        s.drawOther(xPos,yPos,r,g,b,brushSize);
+
     }
 
-    void sendInsToServer(int xPos, int yPos){
+    void sendInsToServer(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
         // Format the integers into a string with the correct format
-        auto intString = format("%d %d ", xPos, yPos);
+        auto intString = format("%d %d %u %u %u %d ", xPos, yPos, r, g, b, brushSize);
         // Concatenate the "_i" prefix with the formatted integers
         auto buffer = "_i " ~ intString;
         //write("auto instruction:",buffer);
@@ -198,7 +194,7 @@ class Client{
         // Main application loop that will run until a quit event has occurred.
         // This is the 'main graphics loop'
         while(runApplication){
-        
+
             SDL_Event e;
             // Handle events
             // Events are pushed into an 'event queue' internally in SDL, and then
@@ -241,6 +237,9 @@ class Client{
 					} else {
 						drawing=true;
 						s.draw(xPos,yPos,1,1);
+                        auto rgb = s.GetSetColor();
+                        auto brushSize = s.getBrushSize();
+                        this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
 					}
                 }else if (e.type == SDL_MOUSEBUTTONUP){
                     if (drawing){
@@ -254,9 +253,11 @@ class Client{
                     // Loop through and update specific pixels
                     // NOTE: No bounds checking performed --
                     //       think about how you might fix this :)
-                    int brushSize=4;
                     s.draw(xPos,yPos,0,1);
-                    this.sendInsToServer(xPos,yPos);
+                    // TODO Add colour and brush size
+                    auto rgb = s.GetSetColor();
+                    auto brushSize = s.getBrushSize();
+                    this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
                 } else if (e.type == SDL_KEYDOWN) {
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
                         if (e.key.keysym.sym == SDLK_s) {
@@ -287,5 +288,5 @@ class Client{
 
 
     }
-        
+
 }
