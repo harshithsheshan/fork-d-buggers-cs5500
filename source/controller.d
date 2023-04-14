@@ -236,7 +236,7 @@ class Client{
 						}
 					} else {
 						drawing=true;
-						s.draw(xPos,yPos,1,1);
+						s.draw(xPos,yPos,1);
                         auto rgb = s.GetSetColor();
                         auto brushSize = s.getBrushSize();
                         this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
@@ -253,7 +253,7 @@ class Client{
                     // Loop through and update specific pixels
                     // NOTE: No bounds checking performed --
                     //       think about how you might fix this :)
-                    s.draw(xPos,yPos,0,1);
+                    s.draw(xPos,yPos,0);
                     // TODO Add colour and brush size
                     auto rgb = s.GetSetColor();
                     auto brushSize = s.getBrushSize();

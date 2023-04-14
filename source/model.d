@@ -94,18 +94,6 @@ class Surface{
     auto getMenuSize(){
         return menuSize;
     }
-    void drawOther(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int size){
-        for (int w=-brushSize; w < size; w++){
-            for (int h=-brushSize; h < size; h++){
-                if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
-                    ubyte[] color = GetPixelColor(xPos+w,yPos+h);
-                    if (color[0] != r || color[1] != g || color[2] != b){
-                        UpdateSurfacePixelFromServer(xPos+w,yPos+h,r,g,b);
-                    }
-                }
-            }
-        }
-    }
     auto GetSetColor(){
         return [red,green,blue];
     }
@@ -314,7 +302,7 @@ class Surface{
         }
     }
 
-	void draw(int xPos, int yPos, int mouseDown, int addQueue){
+	void draw(int xPos, int yPos, int mouseDown){
 		if (mouseDown == 1){
 			cleanQueue();
 			queuePos.insertBack(queue.length);
@@ -325,17 +313,28 @@ class Surface{
 				if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
 					ubyte[] color = GetPixelColor(xPos+w,yPos+h);
 					if(color[0] != red || color[1] != green || color[2] != blue){
-            if (addQueue == 1) {
-              queue.insertBack(xPos+w);
-              queue.insertBack(yPos+h);
-              queue.insertBack(GetPixelColor(xPos+w,yPos+h));
-            }
+                        queue.insertBack(xPos+w);
+                        queue.insertBack(yPos+h);
+                        queue.insertBack(GetPixelColor(xPos+w,yPos+h));
 						UpdateSurfacePixel(xPos+w,yPos+h);
 					}
 				}
 			}
 		}
 	}
+
+    void drawOther(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int size){
+        for (int w=-size; w < size; w++){
+            for (int h=-size; h < size; h++){
+                if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
+                    ubyte[] color = GetPixelColor(xPos+w,yPos+h);
+                    if (color[0] != r || color[1] != g || color[2] != b){
+                        UpdateSurfacePixelFromServer(xPos+w,yPos+h,r,g,b);
+                    }
+                }
+            }
+        }
+    }
 
     int brushIncrease(){
         return brushSize++;
