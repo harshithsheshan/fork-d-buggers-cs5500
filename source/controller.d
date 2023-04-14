@@ -215,26 +215,37 @@ class Client{
 
 					if (yPos < 8*size){
 						if (yPos < 7*size){
-							if (xPos < 17*size){
+                            if (xPos < 17*size){
                                 s.save();
-								writeln("save");
-							} else if (xPos < 25*size && xPos >= 18*size){
-								s.undo();
+								//writeln("save");
+							} else if (xPos < 35*size && xPos >= 18*size){
+                                s.open();
+								//writeln("open");
+							} else if (xPos < 45*size && xPos >= 36*size){
+								auto change = s.undo();
+                                foreach(pixelChange p; change.queue) {
+                                    ubyte[] color = p.color;
+                                    this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
+                                }
 								//writeln("undo");
-							} else if (xPos < 33*size && xPos >= 26*size){
-								s.redo();
+							} else if (xPos < 53*size && xPos >= 46*size){
+								auto change = s.redo();
+                                ubyte[] color = change.nextColor;
+                                foreach(pixelChange p; change.queue) {
+                                    this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
+                                }
 								//writeln("redo");
-							} else if (xPos < 41*size && xPos >= 34*size){
+							} else if (xPos < 61*size && xPos >= 54*size){
 								s.brushDecrease();
 								//writeln("decrease");
-							} else if (xPos < 49*size && xPos >= 42*size){
+							} else if (xPos < 69*size && xPos >= 62*size){
 								s.brushIncrease();
 								//writeln("increase");
-							} else if (xPos >= 51*size){
-								if ((xPos-(51*size)) % (8*size) < 6*size) {
+							} else if (xPos >= 71*size){
+								if ((xPos-(71*size)) % (8*size) < 6*size) {
 									ubyte[] color = s.GetPixelColor(xPos,yPos);
 									s.changeColor(color[0], color[1], color[2]);
-									//writeln("color ", (xPos-(51*size)) / (8*size));
+									//writeln("color ", (xPos-(71*size)) / (8*size));
 								}
 							}
 						}

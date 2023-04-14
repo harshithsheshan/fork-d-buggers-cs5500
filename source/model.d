@@ -8,6 +8,18 @@ import std.array;
 import std.string;
 import std.container : Array;
 
+struct pixelChange {
+	int x;
+	int y;
+	ubyte[] color;
+}
+
+
+struct action {
+	ubyte[] nextColor;
+	auto queue = Array!pixelChange();
+}
+
 class Surface{
 
     SDL_Surface* imgSurface;
@@ -18,15 +30,14 @@ class Surface{
     int width;
 
     int menuSize = 5;
-    auto queuePos = Array!ulong();
-    auto queue = Array!int();
+    auto newQueue = Array!action();
     int pos = 0;
     int brushSize=4;
     ubyte blue = 255;
     ubyte green = 255;
     ubyte red = 255;
 
-    this(int height = 480,int width = 645) {
+    this(int height = 480,int width = 745) {
         // Create a surface...
         this.width = width;
         this.height = height;
@@ -124,198 +135,234 @@ class Surface{
     }
 
     void drawMenu(){
+		
+		// fill screen white
+		for(int i=0; i < width; i++){
+			for(int j=0; j < height; j++){
+				UpdateSurfacePixel(i, j);
+			}
+		}
 
-        // fill screen white
-        for (int i=0; i < width; i++){
-            for (int j=0; j < height; j++){
-                UpdateSurfacePixel(i, j);
-            }
-        }
+		changeColor(0,0,0);
 
-        changeColor(0,0,0);
+		// draw menu bar divider line
+		for(int i=0; i < width; i++){
+			for (int j = 0; j < menuSize; j++) {
+				UpdateSurfacePixel(i, (7*menuSize)+j);
+			}
+		}
 
-        // draw menu bar divider line
-        for (int i=0; i < width; i++){
-            for (int j = 0; j < menuSize; j++) {
-                UpdateSurfacePixel(i, (7*menuSize)+j);
-            }
-        }
+		// writing save button
+		int offset = 0;
+		// s
+		int l = 0;
+		drawBox(l+2, 2, offset);
+		drawBox(l+3, 2, offset);
+		drawBox(l+2, 3, offset);
+		drawBox(l+1, 3, offset);
+		drawBox(l+3, 4, offset);
+		drawBox(l+1, 5, offset);
+		drawBox(l+2, 5, offset);
 
-        // writing save button
-        int offset = 0;
-        // s
-        drawBox(2, 2, offset);
-        drawBox(3, 2, offset);
-        drawBox(2, 3, offset);
-        drawBox(1, 3, offset);
-        drawBox(3, 4, offset);
-        drawBox(1, 5, offset);
-        drawBox(2, 5, offset);
+		// a
+		l = l+4;
+		drawBox(l+2, 2, offset);
+		drawBox(l+3, 2, offset);
+		drawBox(l+1, 3, offset);
+		drawBox(l+3, 3, offset);
+		drawBox(l+1, 4, offset);
+		drawBox(l+3, 4, offset);
+		drawBox(l+2, 5, offset);
+		drawBox(l+3, 5, offset);
 
-        // a
-        drawBox(6, 2, offset);
-        drawBox(7, 2, offset);
-        drawBox(5, 3, offset);
-        drawBox(7, 3, offset);
-        drawBox(5, 4, offset);
-        drawBox(7, 4, offset);
-        drawBox(6, 5, offset);
-        drawBox(7, 5, offset);
+		// v
+		l = l+4;
+		drawBox(l+1, 2, offset);
+		drawBox(l+3, 2, offset);
+		drawBox(l+1, 3, offset);
+		drawBox(l+3, 3, offset);
+		drawBox(l+1, 4, offset);
+		drawBox(l+3, 4, offset);
+		drawBox(l+2, 5, offset);
 
-        // v
-        drawBox(9, 2, offset);
-        drawBox(11, 2, offset);
-        drawBox(9, 3, offset);
-        drawBox(11, 3, offset);
-        drawBox(9, 4, offset);
-        drawBox(11, 4, offset);
-        drawBox(10, 5, offset);
+		// e
+		l = l+4;
+		drawBox(l+2, 2, offset);
+		drawBox(l+3, 2, offset);
+		drawBox(l+1, 3, offset);
+		drawBox(l+3, 3, offset);
+		drawBox(l+1, 4, offset);
+		drawBox(l+2, 4, offset);
+		drawBox(l+2, 5, offset);
+		drawBox(l+3, 5, offset);
 
-        // 3
-        drawBox(14, 2, offset);
-        drawBox(15, 2, offset);
-        drawBox(13, 3, offset);
-        drawBox(15, 3, offset);
-        drawBox(13, 4, offset);
-        drawBox(14, 4, offset);
-        drawBox(14, 5, offset);
-        drawBox(15, 5, offset);
+		// writing open button
+		offset = offset+17;
+		drawBar(offset);
+		offset++;
 
-        // writing undo
-        offset = offset+17;
-        drawBar(offset);
-        drawBox(2, 3, offset);
-        drawBox(3, 2, offset);
-        drawBox(3, 3, offset);
-        drawBox(3, 4, offset);
-        drawBox(4, 1, offset);
-        drawBox(4, 3, offset);
-        drawBox(4, 5, offset);
-        drawBox(5, 3, offset);
-        drawBox(6, 3, offset);
+		// o
+		l = 0;
+		drawBox(l+2, 2, offset);
+		drawBox(l+3, 2, offset);
+		drawBox(l+1, 3, offset);
+		drawBox(l+4, 3, offset);
+		drawBox(l+1, 4, offset);
+		drawBox(l+4, 4, offset);
+		drawBox(l+2, 5, offset);
+		drawBox(l+3, 5, offset);
 
-        // writing redo
-        offset = offset+8;
-        drawBar(offset);
-        drawBox(2, 3, offset);
-        drawBox(5, 2, offset);
-        drawBox(3, 3, offset);
-        drawBox(5, 4, offset);
-        drawBox(4, 1, offset);
-        drawBox(4, 3, offset);
-        drawBox(4, 5, offset);
-        drawBox(5, 3, offset);
-        drawBox(6, 3, offset);
+		// p
+		l = l+5;
+		drawBox(l+1, 2, offset);
+		drawBox(l+2, 2, offset);
+		drawBox(l+1, 3, offset);
+		drawBox(l+3, 3, offset);
+		drawBox(l+1, 4, offset);
+		drawBox(l+2, 4, offset);
+		drawBox(l+1, 5, offset);
 
-        // writing decrease
-        offset = offset+8;
-        drawBar(offset);
-        drawBox(2, 3, offset);
-        drawBox(3, 3, offset);
-        drawBox(4, 3, offset);
-        drawBox(5, 3, offset);
-        drawBox(6, 3, offset);
+		// e
+		l = l+4;
+		drawBox(l+2, 2, offset);
+		drawBox(l+3, 2, offset);
+		drawBox(l+1, 3, offset);
+		drawBox(l+3, 3, offset);
+		drawBox(l+1, 4, offset);
+		drawBox(l+2, 4, offset);
+		drawBox(l+2, 5, offset);
+		drawBox(l+3, 5, offset);
 
-        // writing decrease
-        offset = offset+8;
-        drawBar(offset);
-        drawBox(2, 3, offset);
-        drawBox(3, 3, offset);
-        drawBox(4, 3, offset);
-        drawBox(5, 3, offset);
-        drawBox(6, 3, offset);
-        drawBox(4, 1, offset);
-        drawBox(4, 2, offset);
-        drawBox(4, 4, offset);
-        drawBox(4, 5, offset);
+		// n
+		l = l+4;
+		drawBox(l+1, 2, offset);
+		drawBox(l+2, 2, offset);
+		drawBox(l+3, 2, offset);
+		drawBox(l+1, 3, offset);
+		drawBox(l+4, 3, offset);
+		drawBox(l+1, 4, offset);
+		drawBox(l+4, 4, offset);
+		drawBox(l+1, 5, offset);
+		drawBox(l+4, 5, offset);
 
-        ubyte[] colors = [255,255,255,127,127,127,0,0,0,255,0,0,0,255,0,0,0,255,255,255,0,160,32,240,255,165,0,150,75,0];
+		// writing undo
+		offset = offset+19;
+		drawBar(offset);
+		drawBox(2, 3, offset);
+		drawBox(3, 2, offset);
+		drawBox(3, 3, offset);
+		drawBox(3, 4, offset);
+		drawBox(4, 1, offset);
+		drawBox(4, 3, offset);
+		drawBox(4, 5, offset);
+		drawBox(5, 3, offset);
+		drawBox(6, 3, offset);
 
-        offset = offset+8;
-        int tmpOffset = offset;
-        for (int tmp=0; tmp < colors.length/3; tmp++){
-            drawBar(tmpOffset);
-            tmpOffset = tmpOffset + 8;
-        }
+		// writing redo
+		offset = offset+8;
+		drawBar(offset);
+		drawBox(2, 3, offset);
+		drawBox(5, 2, offset);
+		drawBox(3, 3, offset);
+		drawBox(5, 4, offset);
+		drawBox(4, 1, offset);
+		drawBox(4, 3, offset);
+		drawBox(4, 5, offset);
+		drawBox(5, 3, offset);
+		drawBox(6, 3, offset);
 
-        for (int tmp=0; tmp < colors.length/3; tmp++){
-            changeColor(colors[tmp*3], colors[tmp*3+1], colors[tmp*3+2]);
-            for (int i=1; i < 8; i++){
-                for (int j=0; j < 7; j++){
-                    drawBox(i, j, offset);
-                }
-            }
-            offset = offset + 8;
-        }
+		// writing decrease
+		offset = offset+8;
+		drawBar(offset);
+		drawBox(2, 3, offset);
+		drawBox(3, 3, offset);
+		drawBox(4, 3, offset);
+		drawBox(5, 3, offset);
+		drawBox(6, 3, offset);
 
-        changeColor(0,0,0);
+		// writing decrease
+		offset = offset+8;
+		drawBar(offset);
+		drawBox(2, 3, offset);
+		drawBox(3, 3, offset);
+		drawBox(4, 3, offset);
+		drawBox(5, 3, offset);
+		drawBox(6, 3, offset);
+		drawBox(4, 1, offset);
+		drawBox(4, 2, offset);
+		drawBox(4, 4, offset);
+		drawBox(4, 5, offset);
 
-    }
+		ubyte[] colors = [255,255,255,127,127,127,0,0,0,255,0,0,0,255,0,0,0,255,255,255,0,160,32,240,255,165,0,150,75,0];
 
-	void undo(){
+		offset = offset+8;
+		int tmpOffset = offset;
+		for(int tmp=0; tmp < colors.length/3; tmp++){
+			drawBar(tmpOffset);
+			tmpOffset = tmpOffset + 8;
+		}
+
+		for(int tmp=0; tmp < colors.length/3; tmp++){
+			changeColor(colors[tmp*3], colors[tmp*3+1], colors[tmp*3+2]);
+			for(int i=1; i < 8; i++){
+				for(int j=0; j < 7; j++){
+					drawBox(i, j, offset);
+				}
+			}
+			offset = offset + 8;
+		}
+
+		changeColor(0,0,0);
+
+	}
+
+	action undo(){
 		if (pos > 0){
             ubyte[] color = GetSetColor();
-			ulong r1 = queuePos[pos-1];
-			ulong r2 = queue.length;
-			if (pos < queuePos.length) {
-				r2 = queuePos[pos];
-			}
-			for(ulong i=r2-5; i > r1+3; i=i-5){
-				changeColor(cast(ubyte)queue[i+2], cast(ubyte)queue[i+3], cast(ubyte)queue[i+4]);
-				UpdateSurfacePixel(queue[i], queue[i+1]);
+			auto change = newQueue[pos-1].queue;
+			foreach(pixelChange p; change) {
+				changeColor(p.color[0], p.color[1], p.color[2]);
+				UpdateSurfacePixel(p.x, p.y);
 			}
 			pos--;
 			changeColor(color[0], color[1], color[2]);
+			return newQueue[pos];
 		}
+		return action([0,0,0], Array!pixelChange());
 	}
 
-	void redo(){
-		if (pos < queuePos.length){
+	action redo(){
+		if (pos < newQueue.length){
             ubyte[] color = GetSetColor();
-			ulong r1 = 0;
-			ulong r2 = 0;
-			if (pos > 0) {
-				r1 = queuePos[pos];
-			}
-			if (pos+1 == queuePos.length){
-				r2 = queue.length;
-			} else {
-				r2 = queuePos[pos+1];
-			}
-			changeColor(cast(ubyte)queue[r1], cast(ubyte)queue[r1+1], cast(ubyte)queue[r1+2]);
-			for(ulong i=r1+3; i < r2; i=i+5){
-				UpdateSurfacePixel(queue[i], queue[i+1]);
+			auto change = newQueue[pos].queue;
+			changeColor(newQueue[pos].nextColor[0], newQueue[pos].nextColor[1], newQueue[pos].nextColor[2]);
+			foreach(pixelChange p; change) {
+				UpdateSurfacePixel(p.x, p.y);
 			}
 			pos++;
 			changeColor(color[0], color[1], color[2]);
+			return newQueue[pos-1];
 		}
+		return action([0,0,0], Array!pixelChange());
 	}
 
-    void posIncrease(){
-        pos++;
-    }
-
-    void cleanQueue(){
-        if (queuePos.length > pos){
-            queue.removeBack(queue.length-queuePos[pos]);
-            queuePos.removeBack(queuePos.length-pos);
-        }
-    }
+	void posIncrease(){
+		pos++;
+	}
 
 	void draw(int xPos, int yPos, int mouseDown){
 		if (mouseDown == 1){
-			cleanQueue();
-			queuePos.insertBack(queue.length);
-			queue.insertBack([red, green, blue]);
+			if (newQueue.length > pos){
+				newQueue.removeBack(newQueue.length-pos);
+			}
+			newQueue.insertBack(action([red, green, blue], Array!pixelChange()));
 		}
 		for(int w=-brushSize; w < brushSize; w++){
 			for(int h=-brushSize; h < brushSize; h++){
 				if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
 					ubyte[] color = GetPixelColor(xPos+w,yPos+h);
 					if(color[0] != red || color[1] != green || color[2] != blue){
-                        queue.insertBack(xPos+w);
-                        queue.insertBack(yPos+h);
-                        queue.insertBack(GetPixelColor(xPos+w,yPos+h));
+						newQueue[pos].queue.insertBack(pixelChange(xPos+w,yPos+h,GetPixelColor(xPos+w,yPos+h)));
 						UpdateSurfacePixel(xPos+w,yPos+h);
 					}
 				}
