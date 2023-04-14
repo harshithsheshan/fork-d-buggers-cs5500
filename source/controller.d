@@ -130,7 +130,11 @@ class Client{
     void perform(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
         //writeln("Got instructions for pixel %d %d".format(xPos,yPos));
         //s.draw(xPos,yPos,0,0);
-        s.drawOther(xPos,yPos,r,g,b,brushSize);
+        if (brushSize == -1){
+            s.UpdateSurfacePixelFromServer(xPos,yPos,r,g,b);
+        } else {
+            s.drawOther(xPos,yPos,r,g,b,brushSize);
+        }
 
     }
 

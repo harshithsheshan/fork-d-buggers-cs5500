@@ -254,7 +254,7 @@ class Surface{
 
 	void undo(){
 		if (pos > 0){
-      ubyte[] color = GetSetColor();
+            ubyte[] color = GetSetColor();
 			ulong r1 = queuePos[pos-1];
 			ulong r2 = queue.length;
 			if (pos < queuePos.length) {
@@ -271,7 +271,7 @@ class Surface{
 
 	void redo(){
 		if (pos < queuePos.length){
-      ubyte[] color = GetSetColor();
+            ubyte[] color = GetSetColor();
 			ulong r1 = 0;
 			ulong r2 = 0;
 			if (pos > 0) {
