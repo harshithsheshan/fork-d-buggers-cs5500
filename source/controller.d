@@ -65,7 +65,7 @@ class Client{
         // SDL_Init
         char[80] buffer;
         auto received = mSocket.receive(buffer);
-        writeln("(incoming from server) ", buffer[0 .. received]);
+        writeln("(",mSocket,")", buffer[0 .. received]);
         //writeln("Buffer printed");
         s = new Surface();
         v = new View(s);
@@ -93,18 +93,11 @@ class Client{
             //writeln("Recieved buffer",fromServer);
             auto str = to!string(fromServer);
             //writeln("Printing raw",str);
-
+            auto parts = str.split(' ');
             if(true){
                 if (str.startsWith("_i"))
                 {
-                    //writeln("Debug has _i");
-                    // Split the string into words using whitespace as the delimiter
-                    auto parts = str.split(' ');
-                    //writeln("printing split", parts[0 .. $]);
-                    // Move to the second part of the split (the first integer)
-                    //writeln("parts: ", parts[0 .. $]);
-                    //parts.popFront();
-                    // Extract the first integer
+
                     if (parts[1] == "open"){
                         //writeln("received request to open ", parts[1]);
                         s.open();
@@ -121,7 +114,10 @@ class Client{
                     }
                 }
                 else {
-                    //writeln("(from server)>",fromServer);
+                    if (parts[0] != mSocket.localAddress.toString()){
+                        auto pos = fromServer.indexOf("\0");
+                        writeln(fromServer[0 .. pos]);
+                    }
                 }
             }
         }
@@ -159,9 +155,9 @@ class Client{
         write(">");
         while(clientRunning){
             foreach (line; stdin.byLine){
-                write(">");
+                write("(me)>");
                 // Send the packet of information
-                mSocket.send(line);
+                mSocket.send( mSocket.localAddress.toString()~" : "~ line ~"\0");
             }
             // Now we'll immedietely block and await data from the server
         }
