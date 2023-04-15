@@ -219,7 +219,7 @@ class Client{
 								//writeln("save");
 							} else if (xPos < 35*size && xPos >= 18*size){
                                 s.open();
-								//writeln("open");
+                                this.sendOpenToServer();
 							} else if (xPos < 45*size && xPos >= 36*size){
 								auto change = s.undo();
                                 foreach(pixelChange p; change.queue) {
