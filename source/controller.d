@@ -9,12 +9,18 @@ import std.exception;
 import std.socket;
 import core.thread.osthread;
 import std.algorithm;
+import std.concurrency;
+
 
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
 
+
+
 class Client{
     Socket mSocket;
+    shared bool filenameFlag = false;
+    shared string filename = "downloadedImage";
     this(string host = "localhost", ushort port=50001){
         version(Windows){
             writeln("Searching for SDL on Windows");
@@ -156,8 +162,16 @@ class Client{
         while(clientRunning){
             foreach (line; stdin.byLine){
                 write("(me)>");
-                // Send the packet of information
-                mSocket.send( mSocket.localAddress.toString()~" : "~ line ~"\0");
+                if (filenameFlag) {
+                    filename = to!string(line);
+                    //writeln("received file name", filename);
+                    s.save(filename);
+                    filenameFlag = false;
+                } else {
+                    // Send the packet of information
+                    mSocket.send( mSocket.localAddress.toString()~" : "~ line ~"\0");
+                }
+
             }
             // Now we'll immedietely block and await data from the server
         }
@@ -215,7 +229,9 @@ class Client{
 					if (yPos < 8*size){
 						if (yPos < 7*size){
                             if (xPos < 17*size){
-                                s.save();
+                                writeln("Please enter file name:");
+                                filenameFlag = true;
+                               // s.save();
 								//writeln("save");
 							} else if (xPos < 35*size && xPos >= 18*size){
                                 s.open();
@@ -277,9 +293,9 @@ class Client{
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
                         if (e.key.keysym.sym == SDLK_s) {
                             // Requesting user for file name
-                            //writeln("Please enter file name:");
                             //s.save(readln.chomp());
-                            s.save();
+                            writeln("Please enter file name:");
+                            filenameFlag = true;
                         } else if(e.key.keysym.sym == SDLK_o) {
                             // Requesting user for file name
                             //writeln("Please enter file name:");
