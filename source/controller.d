@@ -224,7 +224,7 @@ class Client{
 								auto change = s.undo();
                                 foreach(pixelChange p; change.queue) {
                                     ubyte[] color = p.color;
-                                    writeln("undo ",p.x,p.y, color[0], color[1], color[2]);
+                                    //writeln("undo ",p.x,p.y, color[0], color[1], color[2]);
                                     this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
                                 }
 								//writeln("undo");
@@ -296,9 +296,7 @@ class Client{
             SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
             // Update the window surface
             SDL_UpdateWindowSurface(v.window);
-            // Delay for 16 milliseconds
-            // Otherwise the program refreshes too quickly
-            SDL_Delay(16);
+
         }
 
 
