@@ -1,28 +1,23 @@
-// @file multithreaded_chat/server.d
-//
-// Start server first: rdmd server.d
 module server;
 import std.socket;
 import std.stdio;
 import core.thread.osthread;
 
-/// The purpose of the TCPServer is to accept
-/// multiple client connections.
-/// Every client that connects will have its own thread
-/// for the server to broadcast information to each client.
-class TCPServer{
+/// The purpose of the Server is to accept multiple client connections.
+/// Every client that connects will have its own thread for the server to broadcast information to each client.
+class Server{
     /// The listening socket is responsible for handling new client connections.
-    Socket        mListeningSocket;
-    
+    private Socket        mListeningSocket;
+
     /// Stores the clients that are currently connected to the server.
-    Socket[]    mClientsConnectedToServer;
+    private Socket[]    mClientsConnectedToServer;
 
     /// Stores all of the data on the server. Ideally, we'll
     /// use this to broadcast out to clients connected.
-    char[80][] mServerData;
+    private char[80][] mServerData;
 
     /// Keeps track of the last message that was broadcast out to each client.
-    uint[] mCurrentMessageToSend;
+    private uint[] mCurrentMessageToSend;
 
     /// Constructor
     /// By default I have choosen localhost and a port that is likely to

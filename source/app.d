@@ -18,7 +18,7 @@ void main(string[] args){
 	}
 	else{
 		if(args[1]=="server"){
-			TCPServer server = new TCPServer();
+			Server server = new Server();
 			server.run();
 		}
 		else if( args[1] == "client"){

@@ -15,10 +15,15 @@ import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
 
 class Client{
-    Socket mSocket;
-    shared bool filenameFlag = false;
-    shared string filename = "downloadedImage";
-    shared Thread stopthread = false;
+    // Member variables like 'const SDLSupport ret'
+    // liklely belong here.
+
+    private const SDLSupport ret;
+    private Surface s;
+    private View v;
+    private Socket mSocket;
+    private shared bool filenameFlag = false;
+    private shared string filename = "downloadedImage";
 
     this(string host = "localhost", ushort port=50001){
         version(Windows){
@@ -71,7 +76,6 @@ class Client{
         char[80] buffer;
         auto received = mSocket.receive(buffer);
         writeln("(",mSocket,")", buffer[0 .. received]);
-        //writeln("Buffer printed");
         s = new Surface();
         v = new View(s);
     }
@@ -82,29 +86,20 @@ class Client{
         writeln("Ending application--good bye!");
     }
 
-    // Member variables like 'const SDLSupport ret'
-    // liklely belong here.
 
-    const SDLSupport ret;
-    Surface s;
-    View v;
 
     void receiveChatFromServer(){
-        while(!stopthread){
+        while(true){
             // Note: It's important to recreate or 'zero out' the buffer so that you do not
             // 			 get previous data leftover in the buffer.
             char[80] buffer;
             auto fromServer = buffer[0 .. mSocket.receive(buffer)];
-            //writeln("Recieved buffer",fromServer);
             auto str = to!string(fromServer);
-            //writeln("Printing raw",str);
             auto parts = str.split(' ');
             if (true){
                 if (str.startsWith("_i"))
                 {
-
                     if (parts[1] == "open"){
-                        //writeln("received request to open ", parts[1]);
                         s.open();
                     }
                     else {
@@ -114,7 +109,6 @@ class Client{
                         auto g = to!ubyte(parts[4]);
                         auto b = to!ubyte(parts[5]);
                         auto brushSize = to!int(parts[6]);
-                        //writeln("performing : at %d %d %u %u %u %d".format(xPos,yPos,r,g,b,brushSize));
                         this.perform(xPos,yPos,r,g,b,brushSize);
                     }
                 }
@@ -129,25 +123,22 @@ class Client{
     }
 
     void perform(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
-        //writeln("Got instructions for pixel %d %d".format(xPos,yPos));
-        //s.draw(xPos,yPos,0,0);
         if (brushSize == -1){
-            s.UpdateSurfacePixelFromServer(xPos,yPos,r,g,b);
+            s.UpdateSurfacePixelHelper(xPos,yPos,r,g,b);
         } else {
-            s.drawOther(xPos,yPos,r,g,b,brushSize);
+            s.drawHelper(xPos,yPos,r,g,b,brushSize);
         }
 
     }
 
-    void sendInsToServer(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
+    void sendInsToServer(int xPos, int yPos, ubyte[] color, int brushSize){
         // Format the integers into a string with the correct format
-        auto intString = format("%d %d %u %u %u %d ", xPos, yPos, r, g, b, brushSize);
+        auto intString = format("%d %d %u %u %u %d ", xPos, yPos, color[0], color[1], color[2], brushSize);
         // Concatenate the "_i" prefix with the formatted integers
         auto buffer = "_i " ~ intString;
         while(buffer.length < 80){
             buffer ~= " ";
         }
-        //write("auto instruction:",buffer);
         mSocket.send(buffer);
     }
 
@@ -158,43 +149,39 @@ class Client{
 
     void sendChatToServer(){
         write(">");
-        while(!stopthread){
+        while(true){
             foreach (line; stdin.byLine){
                 write("(me)>");
                 if (filenameFlag) {
                     filename = to!string(line);
-                    //writeln("received file name", filename);
                     s.save(filename);
                     filenameFlag = false;
                 } else {
                     // Send the packet of information
                     mSocket.send(mSocket.localAddress.toString()~" : "~ line ~"\0");
                 }
-
             }
-            // Now we'll immedietely block and await data from the server
         }
 
     }
 
     /// Purpose of this function is to receive data from the server as it is broadcast out. void receiveChatFromServer(){
     /// The client socket connected to a server
-
     void run(){
         writeln("Preparing to run client");
         writeln("(me)",mSocket.localAddress(),"<---->",mSocket.remoteAddress(),"(server)");
         // Buffer of data to send out
         // Choose '80' bytes of information to be sent/received
 
-        bool clientRunning = true;
-
         // Spin up the new thread that will just take in data from the server
 
-        receiveThread = new Thread(&receiveChatFromServer()).start();
+        new Thread({
+            receiveChatFromServer();
+        }).start();
 
-        sendThread = new Thread(
-            &sendChatToServer(clientRunning)
-        ).start();
+        new Thread({
+            sendChatToServer();
+        }).start();
 
 
         bool runApplication = true;
@@ -228,8 +215,6 @@ class Client{
                             if (xPos < 17*size){
                                 writeln("Please enter file name:");
                                 filenameFlag = true;
-                                // s.save();
-                                //writeln("save");
                             } else if (xPos < 35*size && xPos >= 18*size){
                                 s.open();
                                 this.sendOpenToServer();
@@ -237,28 +222,22 @@ class Client{
                                 auto change = s.undo();
                                 foreach (pixelChange p; change.queue) {
                                     ubyte[] color = p.color;
-                                    //writeln("undo ",p.x,p.y, color[0], color[1], color[2]);
-                                    this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
+                                    this.sendInsToServer(p.x,p.y,color,-1);
                                 }
-                                //writeln("undo");
                             } else if (xPos < 53*size && xPos >= 46*size){
                                 auto change = s.redo();
                                 ubyte[] color = change.nextColor;
                                 foreach (pixelChange p; change.queue) {
-                                    this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
+                                    this.sendInsToServer(p.x,p.y,color,-1);
                                 }
-                                //writeln("redo");
                             } else if (xPos < 61*size && xPos >= 54*size){
                                 s.brushDecrease();
-                                //writeln("decrease");
                             } else if (xPos < 69*size && xPos >= 62*size){
                                 s.brushIncrease();
-                                //writeln("increase");
                             } else if (xPos >= 71*size){
                                 if ((xPos-(71*size)) % (8*size) < 6*size) {
                                     ubyte[] color = s.GetPixelColor(xPos,yPos);
-                                    s.changeColor(color[0], color[1], color[2]);
-                                    //writeln("color ", (xPos-(71*size)) / (8*size));
+                                    s.changeColor(color);
                                 }
                             }
                         }
@@ -267,7 +246,7 @@ class Client{
                         s.draw(xPos,yPos,1);
                         auto rgb = s.GetSetColor();
                         auto brushSize = s.getBrushSize();
-                        this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
+                        this.sendInsToServer(xPos,yPos,rgb,brushSize);
                     }
                 }else if (e.type == SDL_MOUSEBUTTONUP){
                     if (drawing){
@@ -282,15 +261,13 @@ class Client{
                     // NOTE: No bounds checking performed --
                     //       think about how you might fix this :)
                     s.draw(xPos,yPos,0);
-                    // TODO Add colour and brush size
                     auto rgb = s.GetSetColor();
                     auto brushSize = s.getBrushSize();
-                    this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
+                    this.sendInsToServer(xPos,yPos,rgb,brushSize);
                 } else if (e.type == SDL_KEYDOWN) {
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
                         if (e.key.keysym.sym == SDLK_s) {
                             // Requesting user for file name
-                            //s.save(readln.chomp());
                             writeln("Please enter file name:");
                             filenameFlag = true;
                         } else if (e.key.keysym.sym == SDLK_o) {
@@ -306,17 +283,13 @@ class Client{
 
             // Blit the surace (i.e. update the window with another surfaces pixels
             //                       by copying those pixels onto the window).
-            SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
+            SDL_BlitSurface(s.getSurface,null,SDL_GetWindowSurface(v.window),null);
             // Update the window surface
             SDL_UpdateWindowSurface(v.window);
 
         }
 
-        send(sendThread.id, "terminate");
-        sendThread.join();
-        send(thread.id, "terminate");
-        receiveThread.join();
+
     }
 
 }
-
