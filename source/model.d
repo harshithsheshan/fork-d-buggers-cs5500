@@ -371,24 +371,26 @@ class Surface{
 		}
 	}
 
-    // this is function to save the image in BMP format with the file name given by the user
-    //bool save(string fileName)
+    /// This is function to save the image in BMP format with the file name given by the user
     bool save(string fileName)
     {
         const(char)* fileNameWithExt = toStringz(fileName ~ ".bmp");
-        if (SDL_SaveBMP(imgSurface, fileNameWithExt) == 1) {
+		int saveResult = SDL_SaveBMP(imgSurface, fileNameWithExt);
+		// Checking for any error in saving file
+        if (saveResult == 1) {
             writeln("Error occured while saving surface: ", SDL_GetError());
             return false;
         }
         return true;
     }
 
-    // this is function to save the image in BMP format with the file name given by the user
-    //bool open(string fileName)
-    bool open(string fileName)
+	/// This is function to open the image in BMP format with the file name given by the user
+	bool open(string fileName)
     {
 		const(char)* fileNameWithExt = toStringz(fileName ~ ".bmp");
         SDL_Surface* newImage = SDL_LoadBMP(fileNameWithExt);
+
+		// Checking for any error in opening file
         if (newImage == null) {
             writeln("Error occured while opening imaage ", SDL_GetError());
             return false;

@@ -14,10 +14,10 @@ import std.concurrency;
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
 
+/// The purpose of the Client is to start an SDLApp GUI for each client and handle communication between model/view.
 class Client{
     // Member variables like 'const SDLSupport ret'
     // liklely belong here.
-
     private const SDLSupport ret;
     private Surface s;
     private View v;
@@ -26,6 +26,7 @@ class Client{
     private shared bool openFlag = false;
     private shared string filename = "downloadedImage";
 
+    /// This is the client constructor
     this(string host = "localhost", ushort port=50001){
         version(Windows){
             writeln("Searching for SDL on Windows");
@@ -80,14 +81,14 @@ class Client{
         s = new Surface();
         v = new View(s);
     }
+
+    /// This is the client destructor
     ~this(){
         // Handle SDL_QUIT
         mSocket.close();
         SDL_Quit();
         writeln("Ending application--good bye!");
     }
-
-
 
     void receiveChatFromServer(){
         while(true){
@@ -143,27 +144,32 @@ class Client{
         mSocket.send(buffer);
     }
 
+    /// This function sends the instructions to open a file with the file name given by the user so that all the client open the same file synchronously
     void sendOpenToServer(string filename){
         auto buffer = "_i open " ~ filename ~ " ";
         mSocket.send(buffer);
     }
 
-    void sendChatToServer(){
+    /// This function handles user input in the terminal and performs action depending on the type of action
+    void handleUserInput(){
         write(">");
         while(true){
             foreach (line; stdin.byLine){
                 write("(me)>");
+
+                // checking if the save command is initiated
                 if (saveFlag) {
                     filename = to!string(line);
                     s.save(filename);
                     saveFlag = false;
                 } else if (openFlag) {
+                    // checking if the open command is initiated
                     filename = to!string(line);
                     s.open(filename);
                     this.sendOpenToServer(filename);
                     openFlag = false;
                 } else {
-                    // Send the packet of information
+                    // Send the packet of information as chat
                     mSocket.send(mSocket.localAddress.toString()~" : "~ line ~"\0");
                 }
             }
@@ -178,15 +184,14 @@ class Client{
         writeln("(me)",mSocket.localAddress(),"<---->",mSocket.remoteAddress(),"(server)");
         // Buffer of data to send out
         // Choose '80' bytes of information to be sent/received
-
         // Spin up the new thread that will just take in data from the server
-
         new Thread({
             receiveChatFromServer();
         }).start();
 
+        // Spin up the new thread that will just handle user input on the handle like chats, filename for save/open command
         new Thread({
-            sendChatToServer();
+            handleUserInput();
         }).start();
 
 
@@ -195,7 +200,9 @@ class Client{
         //                                                but not yet released)
         bool drawing = false;
 
+        // Drawing the GUI
         s.drawMenu();
+
         int size = s.getMenuSize();
 
         // Main application loop that will run until a quit event has occurred.
@@ -219,9 +226,11 @@ class Client{
                     if (yPos < 8*size){
                         if (yPos < 7*size){
                             if (xPos < 17*size){
+                                // setting the indicator for save command to execute
                                 writeln("Please enter file name:");
                                 saveFlag = true;
                             } else if (xPos < 35*size && xPos >= 18*size){
+                                // setting the indicator for open command to execute
                                 writeln("Please enter file name:");
                                 openFlag = true;
                             } else if (xPos < 45*size && xPos >= 36*size){
@@ -273,9 +282,11 @@ class Client{
                 } else if (e.type == SDL_KEYDOWN) {
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
                         if (e.key.keysym.sym == SDLK_s) {
+                            // save command initiation when user press CTRL + S
                             writeln("Please enter file name:");
                             saveFlag = true;
                         } else if (e.key.keysym.sym == SDLK_o) {
+                            // save command initiation when user press CTRL + O
                             writeln("Please enter file name:");
                             openFlag = true;
                         }
@@ -290,8 +301,5 @@ class Client{
             SDL_UpdateWindowSurface(v.window);
 
         }
-
-
     }
-
 }
