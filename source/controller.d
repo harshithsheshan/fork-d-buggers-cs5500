@@ -11,16 +11,15 @@ import core.thread.osthread;
 import std.algorithm;
 import std.concurrency;
 
-
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
-
-
 
 class Client{
     Socket mSocket;
     shared bool filenameFlag = false;
     shared string filename = "downloadedImage";
+    shared Thread stopthread = false;
+
     this(string host = "localhost", ushort port=50001){
         version(Windows){
             writeln("Searching for SDL on Windows");
@@ -91,7 +90,7 @@ class Client{
     View v;
 
     void receiveChatFromServer(){
-        while(true){
+        while(!stopthread){
             // Note: It's important to recreate or 'zero out' the buffer so that you do not
             // 			 get previous data leftover in the buffer.
             char[80] buffer;
@@ -100,7 +99,7 @@ class Client{
             auto str = to!string(fromServer);
             //writeln("Printing raw",str);
             auto parts = str.split(' ');
-            if(true){
+            if (true){
                 if (str.startsWith("_i"))
                 {
 
@@ -157,9 +156,9 @@ class Client{
         mSocket.send(buffer);
     }
 
-    void sendChatToServer(bool clientRunning){
+    void sendChatToServer(){
         write(">");
-        while(clientRunning){
+        while(!stopthread){
             foreach (line; stdin.byLine){
                 write("(me)>");
                 if (filenameFlag) {
@@ -169,7 +168,7 @@ class Client{
                     filenameFlag = false;
                 } else {
                     // Send the packet of information
-                    mSocket.send( mSocket.localAddress.toString()~" : "~ line ~"\0");
+                    mSocket.send(mSocket.localAddress.toString()~" : "~ line ~"\0");
                 }
 
             }
@@ -191,13 +190,11 @@ class Client{
 
         // Spin up the new thread that will just take in data from the server
 
-        new Thread({
-            receiveChatFromServer();
-        }).start();
+        receiveThread = new Thread(&receiveChatFromServer()).start();
 
-        new Thread({
-            sendChatToServer(clientRunning);
-        }).start();
+        sendThread = new Thread(
+            &sendChatToServer(clientRunning)
+        ).start();
 
 
         bool runApplication = true;
@@ -206,7 +203,7 @@ class Client{
         bool drawing = false;
 
         s.drawMenu();
-		int size = s.getMenuSize();
+        int size = s.getMenuSize();
 
         // Main application loop that will run until a quit event has occurred.
         // This is the 'main graphics loop'
@@ -224,58 +221,58 @@ class Client{
                 }
                 else if (e.type == SDL_MOUSEBUTTONDOWN){
                     int xPos = e.button.x;
-					int yPos = e.button.y;
+                    int yPos = e.button.y;
 
-					if (yPos < 8*size){
-						if (yPos < 7*size){
+                    if (yPos < 8*size){
+                        if (yPos < 7*size){
                             if (xPos < 17*size){
                                 writeln("Please enter file name:");
                                 filenameFlag = true;
-                               // s.save();
-								//writeln("save");
-							} else if (xPos < 35*size && xPos >= 18*size){
+                                // s.save();
+                                //writeln("save");
+                            } else if (xPos < 35*size && xPos >= 18*size){
                                 s.open();
                                 this.sendOpenToServer();
-							} else if (xPos < 45*size && xPos >= 36*size){
-								auto change = s.undo();
-                                foreach(pixelChange p; change.queue) {
+                            } else if (xPos < 45*size && xPos >= 36*size){
+                                auto change = s.undo();
+                                foreach (pixelChange p; change.queue) {
                                     ubyte[] color = p.color;
                                     //writeln("undo ",p.x,p.y, color[0], color[1], color[2]);
                                     this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
                                 }
-								//writeln("undo");
-							} else if (xPos < 53*size && xPos >= 46*size){
-								auto change = s.redo();
+                                //writeln("undo");
+                            } else if (xPos < 53*size && xPos >= 46*size){
+                                auto change = s.redo();
                                 ubyte[] color = change.nextColor;
-                                foreach(pixelChange p; change.queue) {
+                                foreach (pixelChange p; change.queue) {
                                     this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
                                 }
-								//writeln("redo");
-							} else if (xPos < 61*size && xPos >= 54*size){
-								s.brushDecrease();
-								//writeln("decrease");
-							} else if (xPos < 69*size && xPos >= 62*size){
-								s.brushIncrease();
-								//writeln("increase");
-							} else if (xPos >= 71*size){
-								if ((xPos-(71*size)) % (8*size) < 6*size) {
-									ubyte[] color = s.GetPixelColor(xPos,yPos);
-									s.changeColor(color[0], color[1], color[2]);
-									//writeln("color ", (xPos-(71*size)) / (8*size));
-								}
-							}
-						}
-					} else {
-						drawing=true;
-						s.draw(xPos,yPos,1);
+                                //writeln("redo");
+                            } else if (xPos < 61*size && xPos >= 54*size){
+                                s.brushDecrease();
+                                //writeln("decrease");
+                            } else if (xPos < 69*size && xPos >= 62*size){
+                                s.brushIncrease();
+                                //writeln("increase");
+                            } else if (xPos >= 71*size){
+                                if ((xPos-(71*size)) % (8*size) < 6*size) {
+                                    ubyte[] color = s.GetPixelColor(xPos,yPos);
+                                    s.changeColor(color[0], color[1], color[2]);
+                                    //writeln("color ", (xPos-(71*size)) / (8*size));
+                                }
+                            }
+                        }
+                    } else {
+                        drawing=true;
+                        s.draw(xPos,yPos,1);
                         auto rgb = s.GetSetColor();
                         auto brushSize = s.getBrushSize();
                         this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
-					}
+                    }
                 }else if (e.type == SDL_MOUSEBUTTONUP){
                     if (drawing){
-						s.posIncrease();
-					}
+                        s.posIncrease();
+                    }
                     drawing=false;
                 }else if (e.type == SDL_MOUSEMOTION && drawing){
                     // retrieve the position
@@ -296,7 +293,7 @@ class Client{
                             //s.save(readln.chomp());
                             writeln("Please enter file name:");
                             filenameFlag = true;
-                        } else if(e.key.keysym.sym == SDLK_o) {
+                        } else if (e.key.keysym.sym == SDLK_o) {
                             // Requesting user for file name
                             //writeln("Please enter file name:");
                             //s.open(readln.chomp());
@@ -315,7 +312,11 @@ class Client{
 
         }
 
-
+        send(sendThread.id, "terminate");
+        sendThread.join();
+        send(thread.id, "terminate");
+        receiveThread.join();
     }
 
 }
+

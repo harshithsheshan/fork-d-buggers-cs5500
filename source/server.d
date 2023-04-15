@@ -11,6 +11,19 @@ import core.thread.osthread;
 /// Every client that connects will have its own thread
 /// for the server to broadcast information to each client.
 class TCPServer{
+    /// The listening socket is responsible for handling new client connections.
+    Socket        mListeningSocket;
+    
+    /// Stores the clients that are currently connected to the server.
+    Socket[]    mClientsConnectedToServer;
+
+    /// Stores all of the data on the server. Ideally, we'll
+    /// use this to broadcast out to clients connected.
+    char[80][] mServerData;
+
+    /// Keeps track of the last message that was broadcast out to each client.
+    uint[] mCurrentMessageToSend;
+
     /// Constructor
     /// By default I have choosen localhost and a port that is likely to
     /// be free.
@@ -34,7 +47,6 @@ class TCPServer{
     /// Destructor
     ~this(){
         // Close our server listening socket
-        // TODO: If it was never opened, no need to call close
         mListeningSocket.close();
     }
 
@@ -64,10 +76,10 @@ class TCPServer{
             // Let's send our new client friend a welcome message
             newClientSocket.send("Hello friend\0");
 
-               if (mServerData.length != 0 ) {
-                   writeln("Sending data on new connections");
-                   broadcastToAllClients();
-               }
+            // whenever a new client join, we need to sent the latest canvas information to them
+            if (mServerData.length != 0 ) {
+                broadcastToAllClients();
+            }
 
 
             // Now we'll spawn a new thread for the client that
@@ -81,14 +93,12 @@ class TCPServer{
                 clientLoop(newClientSocket);
             }).start();
 
-            // After our new thread has spawned, our server will now resume
-            // listening for more client connections to accept.
         }
     }
 
-    // Function to spawn from a new thread for the client.
-    // The purpose is to listen for data sent from the client
-    // and then rebroadcast that information to all other clients.
+    /// Function to spawn from a new thread for the client.
+    /// The purpose is to listen for data sent from the client
+    /// and then rebroadcast that information to all other clients.
     // NOTE: passing 'clientSocket' by value so it should be a copy of
     //       the connection.
     void clientLoop(Socket clientSocket){
@@ -98,10 +108,10 @@ class TCPServer{
 
         while(runThreadLoop){
             // Check if the socket isAlive
-            if(!clientSocket.isAlive){
+            if (!clientSocket.isAlive){
                 // Then remove the socket
                 runThreadLoop=false;
-                break;
+                break ;
             }
 
             // Message buffer will be 80 bytes
@@ -109,9 +119,6 @@ class TCPServer{
             // Server is now waiting to handle data from specific client
             // We'll block the server awaiting to receive a message.
             auto got = clientSocket.receive(buffer);
-            writeln("Received some data (bytes): ",got);
-            // TODO: Note, you might want to verify 'got'
-            //       is infact 80 bytes
 
             // Store data that we receive in our server.
             // We append the buffer to the end of our server
@@ -119,10 +126,9 @@ class TCPServer{
             // NOTE: Probably want to make this a ring buffer,
             //       so that it does not grow infinitely.
             mServerData ~= buffer;
-            writeln("Buffer recieved:",buffer);
 
-            /// After we receive a single message, we'll just
-            /// immedietely broadcast out to all clients some data.
+            // After we receive a single message, we'll just
+            // immedietely broadcast out to all clients some data.
             broadcastToAllClients();
         }
 
@@ -132,10 +138,9 @@ class TCPServer{
     /// messages to all of the clients that are currently
     /// connected.
     void broadcastToAllClients(){
-        foreach(idx,serverToClient; mClientsConnectedToServer){
+        foreach (idx,serverToClient; mClientsConnectedToServer){
             // Send whatever the latest data was to all the
             // clients.
-            writeln("Broadcasting to :", idx);
             while(serverToClient.isAlive && mCurrentMessageToSend[idx] <= mServerData.length-1){
                 char[80] msg = mServerData[mCurrentMessageToSend[idx]];
                 serverToClient.send(msg[0 .. 80]);
@@ -145,15 +150,4 @@ class TCPServer{
             }
         }
     }
-
-    /// The listening socket is responsible for handling new client connections.
-    Socket 		mListeningSocket;
-    /// Stores the clients that are currently connected to the server.
-    Socket[] 	mClientsConnectedToServer;
-
-    /// Stores all of the data on the server. Ideally, we'll
-    /// use this to broadcast out to clients connected.
-    char[80][] mServerData;
-    /// Keeps track of the last message that was broadcast out to each client.
-    uint[] mCurrentMessageToSend;
 }
