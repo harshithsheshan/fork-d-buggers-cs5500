@@ -7,6 +7,7 @@ import std.stdio;
 import std.array;
 import std.string;
 import std.container : Array;
+import std.algorithm : reverse;
 
 struct pixelChange {
 	int x;
@@ -22,22 +23,21 @@ struct action {
 
 class Surface{
 
+    private:
     SDL_Surface* imgSurface;
     const string DEFAULT_FILENAME = "savedImage";
-
-    //SDL_Window* window;
     int height;
     int width;
-
     int menuSize = 5;
-    auto newQueue = Array!action();
-    int pos = 0;
     int brushSize=4;
     ubyte blue = 255;
     ubyte green = 255;
     ubyte red = 255;
+    auto newQueue = Array!action();
+    int pos = 0;
 
-    this(int height = 530,int width = 745) {
+    public:
+    this(int height = 530,int width = 745){
         // Create a surface...
         this.width = width;
         this.height = height;
@@ -50,6 +50,10 @@ class Surface{
 
     }
 
+    auto getSurface(){
+        return imgSurface;
+    }
+
     auto getHeight(){
         return this.height;
     }
@@ -57,50 +61,6 @@ class Surface{
     auto getWidth(){
         return this.width;
     }
-    // Update a pixel ...
-    // SomeFunction()
-    void UpdateSurfacePixel(int xPos, int yPos){
-        // When we modify pixels, we need to lock the surface first
-        SDL_LockSurface(imgSurface);
-        // Make sure to unlock the surface when we are done.
-        // Retrieve the pixel arraay that we want to modify
-        ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
-        // Change the 'blue' component of the pixels
-        pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+0] = blue;
-        // Change the 'green' component of the pixels
-        pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+1] = green;
-        // Change the 'red' component of the pixels
-        pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+2] = red;
-        SDL_UnlockSurface(imgSurface);
-    }
-
-    void UpdateSurfacePixelFromServer(int xPos, int yPos,ubyte r, ubyte g, ubyte b){
-        // When we modify pixels, we need to lock the surface first
-        SDL_LockSurface(imgSurface);
-        // Make sure to unlock the surface when we are done.
-        // Retrieve the pixel arraay that we want to modify
-        ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
-        // Change the 'blue' component of the pixels
-        pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+0] = b;
-        // Change the 'green' component of the pixels
-        pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+1] = g;
-        // Change the 'red' component of the pixels
-        pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+2] = r;
-        SDL_UnlockSurface(imgSurface);
-    }
-
-
-    // Check a pixel color
-    // Some OtherFunction()
-    auto GetPixelColor(int xPos,int yPos){
-        ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
-        ubyte pixel_b = pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+0];
-        ubyte pixel_g = pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+1];
-        ubyte pixel_r = pixelArray[yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel+2];
-        auto rgb = [pixel_r,pixel_g,pixel_b];
-        return rgb;
-    }
-
 
     auto getMenuSize(){
         return menuSize;
@@ -112,10 +72,47 @@ class Surface{
         return brushSize;
     }
 
-    void changeColor(ubyte r, ubyte g, ubyte b){
-        red = r;
-        green = g;
-        blue = b;
+    int brushIncrease(){
+        return brushSize++;
+    }
+
+    int brushDecrease(){
+        if (brushSize > 1){
+            return brushSize--;
+        }
+        return brushSize;
+    }
+
+    void posIncrease(){
+		pos++;
+	}
+
+
+    void UpdateSurfacePixelHelper(int xPos, int yPos, ubyte r, ubyte g, ubyte b) {
+        SDL_LockSurface(imgSurface);
+        ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
+        int pixelArrayPos = yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel;
+        pixelArray[pixelArrayPos..pixelArrayPos+3] = [b,g,r];
+        SDL_UnlockSurface(imgSurface);
+    }
+
+    void UpdateSurfacePixel(int xPos, int yPos){
+        UpdateSurfacePixelHelper(xPos,yPos,red,green,blue);
+    }
+
+
+    // Check a pixel color
+    // Some OtherFunction()
+    auto GetPixelColor(int xPos,int yPos){
+        ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
+        int pixelArrayPos = yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel;
+        return pixelArray[pixelArrayPos..pixelArrayPos+3].dup().reverse;
+    }
+
+    void changeColor(ubyte[] color){
+        red = color[0];
+        green = color[1];
+        blue = color[2];
     }
 
     void drawBox(int x, int y, int offset){
@@ -143,7 +140,7 @@ class Surface{
 			}
 		}
 
-		changeColor(0,0,0);
+		changeColor([0,0,0]);
 
 		// draw menu bar divider line
 		for(int i=0; i < width; i++){
@@ -303,7 +300,7 @@ class Surface{
 		}
 
 		for(int tmp=0; tmp < colors.length/3; tmp++){
-			changeColor(colors[tmp*3], colors[tmp*3+1], colors[tmp*3+2]);
+			changeColor(colors[tmp*3..tmp*3+3]);
 			for(int i=1; i < 8; i++){
 				for(int j=0; j < 7; j++){
 					drawBox(i, j, offset);
@@ -312,7 +309,7 @@ class Surface{
 			offset = offset + 8;
 		}
 
-		changeColor(0,0,0);
+		changeColor([0,0,0]);
 
 	}
 
@@ -321,11 +318,11 @@ class Surface{
             ubyte[] color = GetSetColor();
 			auto change = newQueue[pos-1].queue;
 			foreach(pixelChange p; change) {
-				changeColor(p.color[0], p.color[1], p.color[2]);
+				changeColor(p.color);
 				UpdateSurfacePixel(p.x, p.y);
 			}
 			pos--;
-			changeColor(color[0], color[1], color[2]);
+			changeColor(color);
 			return newQueue[pos];
 		}
 		return action([0,0,0], Array!pixelChange());
@@ -335,20 +332,32 @@ class Surface{
 		if (pos < newQueue.length){
             ubyte[] color = GetSetColor();
 			auto change = newQueue[pos].queue;
-			changeColor(newQueue[pos].nextColor[0], newQueue[pos].nextColor[1], newQueue[pos].nextColor[2]);
+			changeColor(newQueue[pos].nextColor);
 			foreach(pixelChange p; change) {
 				UpdateSurfacePixel(p.x, p.y);
 			}
 			pos++;
-			changeColor(color[0], color[1], color[2]);
+			changeColor(color);
 			return newQueue[pos-1];
 		}
 		return action([0,0,0], Array!pixelChange());
 	}
 
-	void posIncrease(){
-		pos++;
-	}
+    auto drawHelper(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int size){
+        auto changes = Array!pixelChange();
+        for (int w=-size; w < size; w++){
+            for (int h=-size; h < size; h++){
+                if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
+                    ubyte[] color = GetPixelColor(xPos+w,yPos+h);
+                    if (color[0] != r || color[1] != g || color[2] != b){
+                        changes.insertBack(pixelChange(xPos+w,yPos+h,color));
+                        UpdateSurfacePixelHelper(xPos+w,yPos+h,r,g,b);
+                    }
+                }
+            }
+        }
+		return changes;
+    }
 
 	void draw(int xPos, int yPos, int mouseDown){
 		if (mouseDown == 1){
@@ -357,42 +366,10 @@ class Surface{
 			}
 			newQueue.insertBack(action([red, green, blue], Array!pixelChange()));
 		}
-		for(int w=-brushSize; w < brushSize; w++){
-			for(int h=-brushSize; h < brushSize; h++){
-				if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
-					ubyte[] color = GetPixelColor(xPos+w,yPos+h);
-					if(color[0] != red || color[1] != green || color[2] != blue){
-						newQueue[pos].queue.insertBack(pixelChange(xPos+w,yPos+h,GetPixelColor(xPos+w,yPos+h)));
-						UpdateSurfacePixel(xPos+w,yPos+h);
-					}
-				}
-			}
+		foreach(pixelChange p; drawHelper(xPos, yPos, red, green, blue, brushSize)) {
+			newQueue[pos].queue.insertBack(p);
 		}
 	}
-
-    void drawOther(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int size){
-        for (int w=-size; w < size; w++){
-            for (int h=-size; h < size; h++){
-                if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
-                    ubyte[] color = GetPixelColor(xPos+w,yPos+h);
-                    if (color[0] != r || color[1] != g || color[2] != b){
-                        UpdateSurfacePixelFromServer(xPos+w,yPos+h,r,g,b);
-                    }
-                }
-            }
-        }
-    }
-
-    int brushIncrease(){
-        return brushSize++;
-    }
-
-    int brushDecrease(){
-        if (brushSize > 1){
-            return brushSize--;
-        }
-        return brushSize;
-    }
 
     // this is function to save the image in BMP format with the file name given by the user
     //bool save(string fileName)

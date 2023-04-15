@@ -133,16 +133,16 @@ class Client{
         //writeln("Got instructions for pixel %d %d".format(xPos,yPos));
         //s.draw(xPos,yPos,0,0);
         if (brushSize == -1){
-            s.UpdateSurfacePixelFromServer(xPos,yPos,r,g,b);
+            s.UpdateSurfacePixelHelper(xPos,yPos,r,g,b);
         } else {
-            s.drawOther(xPos,yPos,r,g,b,brushSize);
+            s.drawHelper(xPos,yPos,r,g,b,brushSize);
         }
 
     }
 
-    void sendInsToServer(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
+    void sendInsToServer(int xPos, int yPos, ubyte[] color, int brushSize){
         // Format the integers into a string with the correct format
-        auto intString = format("%d %d %u %u %u %d ", xPos, yPos, r, g, b, brushSize);
+        auto intString = format("%d %d %u %u %u %d ", xPos, yPos, color[0], color[1], color[2], brushSize);
         // Concatenate the "_i" prefix with the formatted integers
         auto buffer = "_i " ~ intString;
         while(buffer.length < 80){
@@ -240,15 +240,14 @@ class Client{
 								auto change = s.undo();
                                 foreach(pixelChange p; change.queue) {
                                     ubyte[] color = p.color;
-                                    //writeln("undo ",p.x,p.y, color[0], color[1], color[2]);
-                                    this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
+                                    this.sendInsToServer(p.x,p.y,color,-1);
                                 }
 								//writeln("undo");
 							} else if (xPos < 53*size && xPos >= 46*size){
 								auto change = s.redo();
                                 ubyte[] color = change.nextColor;
                                 foreach(pixelChange p; change.queue) {
-                                    this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
+                                    this.sendInsToServer(p.x,p.y,color,-1);
                                 }
 								//writeln("redo");
 							} else if (xPos < 61*size && xPos >= 54*size){
@@ -260,7 +259,7 @@ class Client{
 							} else if (xPos >= 71*size){
 								if ((xPos-(71*size)) % (8*size) < 6*size) {
 									ubyte[] color = s.GetPixelColor(xPos,yPos);
-									s.changeColor(color[0], color[1], color[2]);
+									s.changeColor(color);
 									//writeln("color ", (xPos-(71*size)) / (8*size));
 								}
 							}
@@ -270,7 +269,7 @@ class Client{
 						s.draw(xPos,yPos,1);
                         auto rgb = s.GetSetColor();
                         auto brushSize = s.getBrushSize();
-                        this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
+                        this.sendInsToServer(xPos,yPos,rgb,brushSize);
 					}
                 }else if (e.type == SDL_MOUSEBUTTONUP){
                     if (drawing){
@@ -288,7 +287,7 @@ class Client{
                     // TODO Add colour and brush size
                     auto rgb = s.GetSetColor();
                     auto brushSize = s.getBrushSize();
-                    this.sendInsToServer(xPos,yPos,rgb[0],rgb[1],rgb[2],brushSize);
+                    this.sendInsToServer(xPos,yPos,rgb,brushSize);
                 } else if (e.type == SDL_KEYDOWN) {
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
                         if (e.key.keysym.sym == SDLK_s) {
@@ -309,7 +308,7 @@ class Client{
 
             // Blit the surace (i.e. update the window with another surfaces pixels
             //                       by copying those pixels onto the window).
-            SDL_BlitSurface(s.imgSurface,null,SDL_GetWindowSurface(v.window),null);
+            SDL_BlitSurface(s.getSurface,null,SDL_GetWindowSurface(v.window),null);
             // Update the window surface
             SDL_UpdateWindowSurface(v.window);
 
