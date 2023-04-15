@@ -37,7 +37,7 @@ class Surface{
     ubyte green = 255;
     ubyte red = 255;
 
-    this(int height = 480,int width = 745) {
+    this(int height = 530,int width = 745) {
         // Create a surface...
         this.width = width;
         this.height = height;

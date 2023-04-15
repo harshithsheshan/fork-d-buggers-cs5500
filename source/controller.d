@@ -106,7 +106,7 @@ class Client{
                     //parts.popFront();
                     // Extract the first integer
                     if (parts[1] == "open"){
-                        writeln("received request to open ", parts[1]);
+                        //writeln("received request to open ", parts[1]);
                         s.open();
                     }
                     else {
@@ -116,12 +116,12 @@ class Client{
                         auto g = to!ubyte(parts[4]);
                         auto b = to!ubyte(parts[5]);
                         auto brushSize = to!int(parts[6]);
-                        writeln("performing : at %d %d %u %u %u %d".format(xPos,yPos,r,g,b,brushSize));
+                        //writeln("performing : at %d %d %u %u %u %d".format(xPos,yPos,r,g,b,brushSize));
                         this.perform(xPos,yPos,r,g,b,brushSize);
                     }
                 }
                 else {
-                    writeln("(from server)>",fromServer);
+                    //writeln("(from server)>",fromServer);
                 }
             }
         }
@@ -143,6 +143,9 @@ class Client{
         auto intString = format("%d %d %u %u %u %d ", xPos, yPos, r, g, b, brushSize);
         // Concatenate the "_i" prefix with the formatted integers
         auto buffer = "_i " ~ intString;
+        while(buffer.length < 80){
+            buffer ~= " ";
+        }
         //write("auto instruction:",buffer);
         mSocket.send(buffer);
     }
@@ -225,6 +228,7 @@ class Client{
 								auto change = s.undo();
                                 foreach(pixelChange p; change.queue) {
                                     ubyte[] color = p.color;
+                                    writeln("undo ",p.x,p.y, color[0], color[1], color[2]);
                                     this.sendInsToServer(p.x,p.y,color[0],color[1],color[2],-1);
                                 }
 								//writeln("undo");
