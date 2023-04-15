@@ -22,7 +22,8 @@ class Client{
     private Surface s;
     private View v;
     private Socket mSocket;
-    private shared bool filenameFlag = false;
+    private shared bool saveFlag = false;
+    private shared bool openFlag = false;
     private shared string filename = "downloadedImage";
 
     this(string host = "localhost", ushort port=50001){
@@ -100,7 +101,7 @@ class Client{
                 if (str.startsWith("_i"))
                 {
                     if (parts[1] == "open"){
-                        s.open();
+                        s.open(parts[2]);
                     }
                     else {
                         auto xPos = to!int(parts[1]);
@@ -142,8 +143,8 @@ class Client{
         mSocket.send(buffer);
     }
 
-    void sendOpenToServer(){
-        auto buffer = "_i open ";
+    void sendOpenToServer(string filename){
+        auto buffer = "_i open " ~ filename ~ " ";
         mSocket.send(buffer);
     }
 
@@ -152,10 +153,15 @@ class Client{
         while(true){
             foreach (line; stdin.byLine){
                 write("(me)>");
-                if (filenameFlag) {
+                if (saveFlag) {
                     filename = to!string(line);
                     s.save(filename);
-                    filenameFlag = false;
+                    saveFlag = false;
+                } else if (openFlag) {
+                    filename = to!string(line);
+                    s.open(filename);
+                    this.sendOpenToServer(filename);
+                    openFlag = false;
                 } else {
                     // Send the packet of information
                     mSocket.send(mSocket.localAddress.toString()~" : "~ line ~"\0");
@@ -214,10 +220,10 @@ class Client{
                         if (yPos < 7*size){
                             if (xPos < 17*size){
                                 writeln("Please enter file name:");
-                                filenameFlag = true;
+                                saveFlag = true;
                             } else if (xPos < 35*size && xPos >= 18*size){
-                                s.open();
-                                this.sendOpenToServer();
+                                writeln("Please enter file name:");
+                                openFlag = true;
                             } else if (xPos < 45*size && xPos >= 36*size){
                                 auto change = s.undo();
                                 foreach (pixelChange p; change.queue) {
@@ -267,15 +273,11 @@ class Client{
                 } else if (e.type == SDL_KEYDOWN) {
                     if ((e.key.keysym.mod & KMOD_CTRL) != 0) {
                         if (e.key.keysym.sym == SDLK_s) {
-                            // Requesting user for file name
                             writeln("Please enter file name:");
-                            filenameFlag = true;
+                            saveFlag = true;
                         } else if (e.key.keysym.sym == SDLK_o) {
-                            // Requesting user for file name
-                            //writeln("Please enter file name:");
-                            //s.open(readln.chomp());
-                            s.open();
-                            this.sendOpenToServer();
+                            writeln("Please enter file name:");
+                            openFlag = true;
                         }
                     }
                 }

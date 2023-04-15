@@ -385,9 +385,9 @@ class Surface{
 
     // this is function to save the image in BMP format with the file name given by the user
     //bool open(string fileName)
-    bool open()
+    bool open(string fileName)
     {
-        const(char)* fileNameWithExt = toStringz(DEFAULT_FILENAME ~ ".bmp");
+		const(char)* fileNameWithExt = toStringz(fileName ~ ".bmp");
         SDL_Surface* newImage = SDL_LoadBMP(fileNameWithExt);
         if (newImage == null) {
             writeln("Error occured while opening imaage ", SDL_GetError());
