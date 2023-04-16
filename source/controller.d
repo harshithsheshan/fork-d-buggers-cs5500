@@ -137,7 +137,10 @@ class Client{
         // Format the integers into a string with the correct format
         auto intString = format("%d %d %u %u %u %d ", xPos, yPos, color[0], color[1], color[2], brushSize);
         // Concatenate the "_i" prefix with the formatted integers
-        auto buffer = format("_i %s%s", intString, repeat('-', 77 - intString.length));
+        auto buffer = "_i " ~ intString;
+        while(buffer.length < 80){
+            buffer ~= " ";
+        }
         mSocket.send(buffer);
     }
 
