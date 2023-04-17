@@ -121,7 +121,7 @@ class Server{
             // NOTE: Probably want to make this a ring buffer,
             //       so that it does not grow infinitely.
             mServerData ~= buffer;
-
+            writeln("[Recieving] message/instruction from <<<<<<< ","(",clientSocket.localAddress.toString(),")");
             // After we receive a single message, we'll just
             // immedietely broadcast out to all clients some data.
             broadcastToAllClients();
@@ -136,9 +136,11 @@ class Server{
         foreach (idx,serverToClient; mClientsConnectedToServer){
             // Send whatever the latest data was to all the
             // clients.
+            writeln("[Broadcasting] messages/instructions to >>>>>>> ","(",serverToClient.localAddress.toString(),")");
             while(serverToClient.isAlive && mCurrentMessageToSend[idx] <= mServerData.length-1){
                 char[80] msg = mServerData[mCurrentMessageToSend[idx]];
                 serverToClient.send(msg[0 .. 80]);
+                // Important to increment the message only after sending
                 // Important to increment the message only after sending
                 // the previous message to as many clients as exist.
                 mCurrentMessageToSend[idx]++;

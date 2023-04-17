@@ -178,8 +178,7 @@ class Client{
         write(">");
         while(true){
             foreach (line; stdin.byLine){
-                write("(me)>");
-
+                write(">");
                 // checking if the save command is initiated
                 if (saveFlag) {
                     filename = to!string(line);
