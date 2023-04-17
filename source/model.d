@@ -410,7 +410,17 @@ class Surface{
     bool save(string fileName)
     {
         const(char)* fileNameWithExt = toStringz(fileName ~ ".bmp");
-		int saveResult = SDL_SaveBMP(imgSurface, fileNameWithExt);
+        SDL_Surface* newSurface = SDL_CreateRGBSurface(0,width,height-40,32,0,0,0,0);
+        SDL_LockSurface(newSurface);
+        ubyte* pixelArray = cast(ubyte*)newSurface.pixels;
+        for (int i=0; i < width; i++){
+            for (int j=0; j < height-(menuSize*8); j++){
+                int pixelArrayPos = j*newSurface.pitch + i*newSurface.format.BytesPerPixel;
+                pixelArray[pixelArrayPos..pixelArrayPos+3] = GetPixelColor(i,j+(menuSize*8)).reverse;
+            }
+        }
+        SDL_UnlockSurface(newSurface);
+		int saveResult = SDL_SaveBMP(newSurface, fileNameWithExt);
 		// Checking for any error in saving file
         if (saveResult == 1) {
             writeln("Error occured while saving surface: ", SDL_GetError());
@@ -430,7 +440,14 @@ class Surface{
             writeln("Error occured while opening imaage ", SDL_GetError());
             return false;
         }
-        imgSurface = newImage;
+        ubyte* pixelArray = cast(ubyte*)newImage.pixels;
+        for (int i=0; i < width; i++){
+            for (int j=(menuSize*8); j < height; j++){
+                int pixelArrayPos = (j-(menuSize*8))*newImage.pitch + i*newImage.format.BytesPerPixel;
+                ubyte[] color = pixelArray[pixelArrayPos..pixelArrayPos+3].dup().reverse;
+                UpdateSurfacePixelHelper(i,j,color[0],color[1],color[2]);
+            }
+        }
         return true;
     }
 
