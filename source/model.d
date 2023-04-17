@@ -22,6 +22,7 @@ struct action {
 	auto queue = Array!pixelChange();
 }
 
+/// Surface is the model class that model the canvas details like height, width, pixel values, brush size and related methods that help operate on model.
 class Surface{
 
     private:
@@ -39,6 +40,7 @@ class Surface{
     auto actionQueue = Array!action();
     int actionQueuePos = 0;
 
+	/// contructor for the class
     public:
     this(int height = 530,int width = 745){
         // Create a surface...
@@ -48,6 +50,8 @@ class Surface{
         drawMenu();
 
     }
+
+	/// contructor for the class
     ~this(){
         // Free a surface...
         SDL_FreeSurface(imgSurface);
@@ -406,7 +410,14 @@ class Surface{
 		}
 	}
 
-    /// This is function to save the image in BMP format with the file name given by the user
+	/**
+    * This is function to save the image in BMP format with the file name given by the user.
+    * Params:
+    *       fileName = name of file to be saved
+    *
+    * Returns:
+    *        bool = true if saved successfully else false
+    */
     bool save(string fileName)
     {
         const(char)* fileNameWithExt = toStringz(fileName ~ ".bmp");
@@ -429,7 +440,14 @@ class Surface{
         return true;
     }
 
-	/// This is function to open the image in BMP format with the file name given by the user
+	/**
+    * This is function to open the image in BMP format with the file name given by the user
+    * Params:
+    *       fileName = name of file to be opened
+    *
+    * Returns:
+    *        bool = true if opened successfully else false
+    */
 	bool open(string fileName)
     {
 		const(char)* fileNameWithExt = toStringz(fileName ~ ".bmp");

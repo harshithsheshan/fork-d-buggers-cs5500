@@ -15,7 +15,9 @@ import std.range : repeat;
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
 
-/// The purpose of the Client is to start an SDLApp GUI for each client and handle communication between model/view.
+/**
+ * The purpose of the Client is to start an SDLApp GUI for each client and handle communication between model/view.
+*/
 class Client{
 
     private const SDLSupport ret;
@@ -26,7 +28,13 @@ class Client{
     private shared bool openFlag = false;
     private shared string filename = "downloadedImage";
 
-    /// This is the client constructor
+
+    /**
+    * This is the client constructor.
+    * Params:
+    *       host = host for the client
+    *       port = port number for the client
+    */
     this(string host = "localhost", ushort port=50001){
         version(Windows){
             writeln("Searching for SDL on Windows");
@@ -82,13 +90,16 @@ class Client{
         v = new View(s);
     }
 
-    /// This is the client destructor
+    /**
+    * This is the client destructor.
+    */
     ~this(){
         // Handle SDL_QUIT
         mSocket.close();
         SDL_Quit();
         writeln("Ending application--good bye!");
     }
+
     /**
     * This function runs on a new thread and recieves instructions and chat messages
     * sent from the server. Based on the type of message it recieves it then interprets
@@ -128,7 +139,8 @@ class Client{
             }
         }
     }
-    /****
+
+    /**
     * This function is invoked whenever the controller/client recieves an instruction from the server.
     * Based on the information recieved from the server changes are made to the model to maintain sycn
     * between clients.
@@ -148,7 +160,8 @@ class Client{
         }
 
     }
-    /***
+
+    /**
     * This function sends instruction to the server whenever a change is made to the model by the user.
     * Params:
     *       xPos = x coordinate
@@ -167,13 +180,20 @@ class Client{
         mSocket.send(buffer);
     }
 
-    /// This function sends the instructions to open a file with the file name given by the user so that all the client open the same file synchronously
+    /**
+    * This function sends the instructions to open a file with the file name given by the
+    * user so that all the client open the same file synchronously.
+    *
+    */
     void sendOpenToServer(string filename){
         auto buffer = "_i open " ~ filename ~ " ";
         mSocket.send(buffer);
     }
 
-    /// This function handles user input in the terminal and performs action depending on the type of action
+
+    /**
+    * This function handles user input in the terminal and performs action depending on the type of action.
+    */
     void handleUserInput(){
         write(">");
         while(true){
@@ -199,8 +219,9 @@ class Client{
 
     }
 
-    /// Purpose of this function is to receive data from the server as it is broadcast out. void receiveChatFromServer(){
-    /// The client socket connected to a server
+    /**
+    * Purpose of this function is to receive data from the server as it is broadcast out.
+    */
     void run(){
         writeln("Preparing to run client");
         writeln("(me)",mSocket.localAddress(),"<---->",mSocket.remoteAddress(),"(server)");

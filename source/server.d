@@ -3,25 +3,33 @@ import std.socket;
 import std.stdio;
 import core.thread.osthread;
 
-/// The purpose of the Server is to accept multiple client connections.
-/// Every client that connects will have its own thread for the server to broadcast information to each client.
+/**
+* The purpose of the Server is to accept multiple client connections.
+* Every client that connects will have its own thread for the server to broadcast information to each client.
+*
+*/
 class Server{
-    /// The listening socket is responsible for handling new client connections.
+    // The listening socket is responsible for handling new client connections.
     private Socket        mListeningSocket;
 
-    /// Stores the clients that are currently connected to the server.
+    // Stores the clients that are currently connected to the server.
     private Socket[]    mClientsConnectedToServer;
 
-    /// Stores all of the data on the server. Ideally, we'll
-    /// use this to broadcast out to clients connected.
+    // Stores all of the data on the server. Ideally, we'll
+    // use this to broadcast out to clients connected.
     private char[80][] mServerData;
 
-    /// Keeps track of the last message that was broadcast out to each client.
+    // Keeps track of the last message that was broadcast out to each client.
     private uint[] mCurrentMessageToSend;
 
-    /// Constructor
-    /// By default I have choosen localhost and a port that is likely to
-    /// be free.
+    /**
+    * This function is constructor for the server class.
+    * By default, it opens on localhost and a port 50001.
+    * Params:
+    *       host = host for the server, localhost by default
+    *       port = port for the server, 50001 by default
+    *       maxConnectionsBacklog = maximum number of connections, by default 4.
+    */
     this(string host = "localhost", ushort port=50001, ushort maxConnectionsBacklog=4){
         writeln("Starting server...");
         writeln("Server must be started before clients may join");
@@ -39,20 +47,23 @@ class Server{
         mListeningSocket.listen(maxConnectionsBacklog);
     }
 
-    /// Destructor
+    /**
+    * This is the destructor for the server class.
+    */
     ~this(){
         // Close our server listening socket
         mListeningSocket.close();
     }
 
-    /// Call this after the server has been created
-    /// to start running the server
+    /**
+    * This function is to to start running the server, call this after the server has been created
+    */
     void run(){
         bool serverIsRunning=true;
         while(serverIsRunning){
             // The servers job now is to just accept connections
             writeln("Waiting to accept more connections");
-            /// accept is a blocking call.
+            // accept is a blocking call.
             auto newClientSocket = mListeningSocket.accept();
             // After a new connection is accepted, let's confirm.
             writeln("Hey, a new client joined!");
@@ -91,11 +102,12 @@ class Server{
         }
     }
 
-    /// Function to spawn from a new thread for the client.
-    /// The purpose is to listen for data sent from the client
-    /// and then rebroadcast that information to all other clients.
-    // NOTE: passing 'clientSocket' by value so it should be a copy of
-    //       the connection.
+    /**
+    * Function to spawn from a new thread for the client.
+    * The purpose is to listen for data sent from the client and then rebroadcast that information to all other clients.
+    * Params:
+    *       clientSocket = Socket where client is connnected
+    */
     void clientLoop(Socket clientSocket){
         writeln("\t Starting clientLoop:(me)",clientSocket.localAddress(),"<---->",clientSocket.remoteAddress(),"(client)");
 
@@ -129,9 +141,9 @@ class Server{
 
     }
 
-    /// The purpose of this function is to broadcast
-    /// messages to all of the clients that are currently
-    /// connected.
+    /**
+    * The purpose of this function is to broadcast messages to all of the clients that are currently connected.
+    */
     void broadcastToAllClients(){
         foreach (idx,serverToClient; mClientsConnectedToServer){
             // Send whatever the latest data was to all the
