@@ -10,6 +10,7 @@ import std.socket;
 import core.thread.osthread;
 import std.algorithm;
 import std.concurrency;
+import std.range : repeat;
 
 import bindbc.sdl;
 import loader = bindbc.loader.sharedlib;
@@ -162,10 +163,7 @@ class Client{
         // Format the integers into a string with the correct format
         auto intString = format("%d %d %u %u %u %d ", xPos, yPos, color[0], color[1], color[2], brushSize);
         // Concatenate the "_i" prefix with the formatted integers
-        auto buffer = "_i " ~ intString;
-        while(buffer.length < 80){
-            buffer ~= " ";
-        }
+        auto buffer = format("_i %s%s", intString, repeat('-', 77 - intString.length));
         mSocket.send(buffer);
     }
 
@@ -225,10 +223,8 @@ class Client{
         //                                                but not yet released)
         bool drawing = false;
 
-        // Drawing the GUI
-        s.drawMenu();
-
         int size = s.getMenuSize();
+        auto offsets = s.getMenuOffsets();
 
         // Main application loop that will run until a quit event has occurred.
         // This is the 'main graphics loop'
@@ -250,38 +246,37 @@ class Client{
 
                     if (yPos < 8*size){
                         if (yPos < 7*size){
-                            if (xPos < 17*size){
+                            if (xPos < offsets[0]){
                                 // setting the indicator for save command to execute
                                 writeln("Please enter file name:");
                                 saveFlag = true;
-                            } else if (xPos < 35*size && xPos >= 18*size){
+                            } else if (xPos < offsets[1] && xPos >= offsets[0]+size){
                                 // setting the indicator for open command to execute
                                 writeln("Please enter file name:");
                                 openFlag = true;
-                            } else if (xPos < 45*size && xPos >= 36*size){
+                            } else if (xPos < offsets[2] && xPos >= offsets[1]+size){
                                 // checking if the colour was made.
                                 auto change = s.undo();
                                 foreach (pixelChange p; change.queue) {
                                     ubyte[] color = p.color;
                                     this.sendInsToServer(p.x,p.y,color,-1);
                                 }
-                            } else if (xPos < 53*size && xPos >= 46*size){
+                            } else if (xPos < offsets[3] && xPos >= offsets[2]+size){
                                 // checking if the colour was made.
                                 auto change = s.redo();
                                 ubyte[] color = change.nextColor;
                                 foreach (pixelChange p; change.queue) {
                                     this.sendInsToServer(p.x,p.y,color,-1);
                                 }
-                            } else if (xPos < 61*size && xPos >= 54*size){
+                            } else if (xPos < offsets[4] && xPos >= offsets[3]+size){
                                 // checking if the button to decrease brush size was clicked.
                                 s.brushDecrease();
-                            } else if (xPos < 69*size && xPos >= 62*size){
+                            } else if (xPos < offsets[5] && xPos >= offsets[4]+size){
                                 // checking if the button to increase brush size was clicked.
                                 s.brushIncrease();
-                            } else if (xPos >= 71*size){
-                                if ((xPos-(71*size)) % (8*size) < 6*size) {
-                                    ubyte[] color = s.GetPixelColor(xPos,yPos);
-                                    s.changeColor(color);
+                            } else if (xPos > offsets[5]+size){
+                                if ((xPos-(offsets[5]+size)) % (8*size) < 7*size) {
+                                    s.changeColor(s.getPresetColor((xPos-(offsets[5]+size)) / (8*size)));
                                 }
                             }
                         }
