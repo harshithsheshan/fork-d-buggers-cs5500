@@ -16,8 +16,7 @@ import loader = bindbc.loader.sharedlib;
 
 /// The purpose of the Client is to start an SDLApp GUI for each client and handle communication between model/view.
 class Client{
-    // Member variables like 'const SDLSupport ret'
-    // liklely belong here.
+
     private const SDLSupport ret;
     private Surface s;
     private View v;
@@ -89,7 +88,12 @@ class Client{
         SDL_Quit();
         writeln("Ending application--good bye!");
     }
-
+    /**
+    * This function runs on a new thread and recieves instructions and chat messages
+    * sent from the server. Based on the type of message it recieves it then interprets
+    * if its a message or an instruction and performs the instructions.
+    *
+    */
     void receiveChatFromServer(){
         while(true){
             // Note: It's important to recreate or 'zero out' the buffer so that you do not
@@ -123,7 +127,18 @@ class Client{
             }
         }
     }
-
+    /****
+    * This function is invoked whenever the controller/client recieves an instruction from the server.
+    * Based on the information recieved from the server changes are made to the model to maintain sycn
+    * between clients.
+    * Params:
+    *       xPos = x coordinate
+    *       yPos = y coordinate
+    *       r = Red quotient of updated pixel.
+    *       g = Green quotient of updated pixel.
+    *       b = Blue quotient of updated pixel.
+    *       brushSize = Brush size of the change performed.
+    */
     void perform(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
         if (brushSize == -1){
             s.UpdateSurfacePixelHelper(xPos,yPos,r,g,b);
@@ -132,7 +147,17 @@ class Client{
         }
 
     }
-
+    /***
+    * This function sends instruction to the server whenever a change is made to the model by the user.
+    * Params:
+    *       xPos = x coordinate
+    *       yPos = y coordinate
+    *       ubyte[] =  [r,g,b]
+    *       r = Red quotient of updated pixel.
+    *       g = Green quotient of updated pixel.
+    *       b = Blue quotient of updated pixel.
+    *       brushSize = Brush size of the change performed.
+    */
     void sendInsToServer(int xPos, int yPos, ubyte[] color, int brushSize){
         // Format the integers into a string with the correct format
         auto intString = format("%d %d %u %u %u %d ", xPos, yPos, color[0], color[1], color[2], brushSize);
@@ -234,20 +259,24 @@ class Client{
                                 writeln("Please enter file name:");
                                 openFlag = true;
                             } else if (xPos < 45*size && xPos >= 36*size){
+                                // checking if the colour was made.
                                 auto change = s.undo();
                                 foreach (pixelChange p; change.queue) {
                                     ubyte[] color = p.color;
                                     this.sendInsToServer(p.x,p.y,color,-1);
                                 }
                             } else if (xPos < 53*size && xPos >= 46*size){
+                                // checking if the colour was made.
                                 auto change = s.redo();
                                 ubyte[] color = change.nextColor;
                                 foreach (pixelChange p; change.queue) {
                                     this.sendInsToServer(p.x,p.y,color,-1);
                                 }
                             } else if (xPos < 61*size && xPos >= 54*size){
+                                // checking if the button to decrease brush size was clicked.
                                 s.brushDecrease();
                             } else if (xPos < 69*size && xPos >= 62*size){
+                                // checking if the button to increase brush size was clicked.
                                 s.brushIncrease();
                             } else if (xPos >= 71*size){
                                 if ((xPos-(71*size)) % (8*size) < 6*size) {
