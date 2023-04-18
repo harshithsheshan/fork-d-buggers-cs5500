@@ -2,6 +2,8 @@ module server;
 import std.socket;
 import std.stdio;
 import core.thread.osthread;
+import std.algorithm;
+
 
 /**
 * The purpose of the Server is to accept multiple client connections.
@@ -13,7 +15,7 @@ class Server{
     Socket        mListeningSocket;
 
     // Stores the clients that are currently connected to the server.
-    private Socket[]    mClientsConnectedToServer;
+    private Socket[]  mClientsConnectedToServer;
 
     // Stores all of the data on the server. Ideally, we'll
     // use this to broadcast out to clients connected.
@@ -75,7 +77,7 @@ class Server{
             // accept is a blocking call.
             auto newClientSocket = mListeningSocket.accept();
             // After a new connection is accepted, let's confirm.
-            writeln("Hey, a new client joined!");
+            writeln("[Joined] "~newClientSocket.remoteAddress.toString());
             writeln("(me)",newClientSocket.localAddress(),"<---->",newClientSocket.remoteAddress(),"(client)");
             // Now pragmatically what we'll do, is spawn a new
             // thread to handle the work we want to do.
@@ -87,7 +89,7 @@ class Server{
             //       want to send a client the whole history.
             mCurrentMessageToSend ~= 0;
 
-            writeln("Friends on server = ",mClientsConnectedToServer.length);
+            writeln("===>Friends on server = ",mClientsConnectedToServer.length);
             // Let's send our new client friend a welcome message
             newClientSocket.send("Hello friend\0");
 
@@ -142,30 +144,41 @@ class Server{
             // NOTE: Probably want to make this a ring buffer,
             //       so that it does not grow infinitely.
             mServerData ~= buffer;
-            writeln("[Recieving] message/instruction from <<<<<<< ","(",clientSocket.localAddress.toString(),")");
+            if (buffer[0]=='X' &&buffer[1]=='X'){
+                writeln("[LEFT] "~clientSocket.remoteAddress.toString());
+                mClientsConnectedToServer = mClientsConnectedToServer.remove!(a => a is clientSocket);
+                writeln("===>Friends on server = ",mClientsConnectedToServer.length);
+                runThreadLoop = false;
+                continue ;
+            }
+            writeln("[Recieving] message/instruction from <<<<<<< ","(",clientSocket.remoteAddress.toString(),")");
             // After we receive a single message, we'll just
             // immedietely broadcast out to all clients some data.
             broadcastToAllClients();
+            return ;
         }
-
     }
 
-    /**
+
+
+        /**
     * The purpose of this function is to broadcast messages to all of the clients that are currently connected.
     */
-    void broadcastToAllClients(){
-        foreach (idx,serverToClient; mClientsConnectedToServer){
-            // Send whatever the latest data was to all the
-            // clients.
-            writeln("[Broadcasting] messages/instructions to >>>>>>> ","(",serverToClient.localAddress.toString(),")");
-            while(serverToClient.isAlive && mCurrentMessageToSend[idx] <= mServerData.length-1){
-                char[80] msg = mServerData[mCurrentMessageToSend[idx]];
-                serverToClient.send(msg[0 .. 80]);
-                // Important to increment the message only after sending
-                // Important to increment the message only after sending
-                // the previous message to as many clients as exist.
-                mCurrentMessageToSend[idx]++;
+        void broadcastToAllClients(){
+            foreach (idx,serverToClient; mClientsConnectedToServer){
+                // Send whatever the latest data was to all the
+                // clients.
+
+                while(serverToClient.isAlive && mCurrentMessageToSend[idx] <= mServerData.length-1){
+                    writeln("[Broadcasting] messages/instructions to >>>>>>> ","(",serverToClient.remoteAddress.toString(),")");
+                    char[80] msg = mServerData[mCurrentMessageToSend[idx]];
+                    serverToClient.send(msg[0 .. 80]);
+                    // Important to increment the message only after sending
+                    // Important to increment the message only after sending
+                    // the previous message to as many clients as exist.
+                    mCurrentMessageToSend[idx]++;
+                }
             }
         }
-    }
+
 }

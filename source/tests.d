@@ -42,7 +42,6 @@ unittest{
     auto received = clientS.receive(buffer);
     writeln(buffer[0 .. received]);
 
-
     server.mListeningSocket.close();
     clientS.close();
 

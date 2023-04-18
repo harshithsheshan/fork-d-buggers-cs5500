@@ -95,6 +95,7 @@ class Client{
     */
     ~this(){
         // Handle SDL_QUIT
+        mSocket.send("XX");
         mSocket.close();
         SDL_Quit();
         writeln("Ending application--good bye!");

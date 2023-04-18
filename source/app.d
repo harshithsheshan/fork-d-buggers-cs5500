@@ -19,7 +19,5 @@ void main(string[] args){
 			Client client = new Client();
 			client.run();
 		}
-
 	}
-
 }
