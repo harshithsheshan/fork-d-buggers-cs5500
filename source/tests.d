@@ -17,16 +17,16 @@ import std.exception;
 import std.string;
 private SDLSupport ret;
 
-//@("check if file saved and opened successfully")
-//unittest{
-//    ret = loadSDL();
-//    Surface s = new Surface();
-//    s.UpdateSurfacePixel(100, 200);
-//    bool saveResult = s.save("testFile");
-//    assert(saveResult);
-//    bool openResult = s.open("testFile");
-//    assert(openResult);
-//}
+@("check if file saved and opened successfully")
+unittest{
+    ret = loadSDL();
+    Surface s = new Surface();
+    s.UpdateSurfacePixel(100, 200);
+    bool saveResult = s.save("testFile");
+    assert(saveResult);
+    bool openResult = s.open("testFile");
+    assert(openResult);
+}
 
 @("test networked chat")
 unittest{
@@ -40,14 +40,11 @@ unittest{
 
     char[80] buffer;
     auto received = clientS.receive(buffer);
-    writeln(buffer[0 .. received]);
-
     server.mListeningSocket.close();
     clientS.close();
 
     server.destroy();
     string msg = to!string(buffer);
-    //writeln(msg);
     assert(msg.canFind("Hello friend"));
 
 }
