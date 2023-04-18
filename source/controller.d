@@ -163,7 +163,7 @@ class Client{
     */
     void perform(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int brushSize){
         if (brushSize == -1){
-            s.UpdateSurfacePixelHelper(xPos,yPos,r,g,b);
+            s.updateSurfacePixelHelper(xPos,yPos,r,g,b);
         } else {
             s.drawHelper(xPos,yPos,r,g,b,brushSize);
         }

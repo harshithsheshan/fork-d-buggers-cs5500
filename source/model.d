@@ -117,7 +117,7 @@ class Surface{
 	}
 
     /// Helper function to update a pixel value after it is provided expanded consitions
-    void UpdateSurfacePixelHelper(int xPos, int yPos, ubyte r, ubyte g, ubyte b) {
+    void updateSurfacePixelHelper(int xPos, int yPos, ubyte r, ubyte g, ubyte b) {
         SDL_LockSurface(imgSurface);
         ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
         int pixelArrayPos = yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel;
@@ -126,12 +126,12 @@ class Surface{
     }
 
     /// Function to update a pixel value after it is provided a position and using the set color
-    void UpdateSurfacePixel(int xPos, int yPos){
-        UpdateSurfacePixelHelper(xPos,yPos,red,green,blue);
+    void updateSurfacePixel(int xPos, int yPos){
+        updateSurfacePixelHelper(xPos,yPos,red,green,blue);
     }
 
     /// Function to retrieve the color of a pixel at a given position
-    auto GetPixelColor(int xPos,int yPos){
+    auto getPixelColor(int xPos,int yPos){
         ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
         int pixelArrayPos = yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel;
         return pixelArray[pixelArrayPos..pixelArrayPos+3].dup().reverse;
@@ -151,7 +151,7 @@ class Surface{
         void drawBox(int x, int y){
             for (int i = 0; i < menuSize; i++) {
                 for (int j = 0; j < menuSize; j++) {
-                    UpdateSurfacePixel((x*menuSize)+i, (y*menuSize)+j);
+                    updateSurfacePixel((x*menuSize)+i, (y*menuSize)+j);
                 }
             }
         }
@@ -160,7 +160,7 @@ class Surface{
         void drawBar(int x){
             for (int i = 0; i < menuSize; i++) {
                 for (int j = 0; j < (menuSize*8); j++) {
-                    UpdateSurfacePixel((x*menuSize)+i, j);
+                    updateSurfacePixel((x*menuSize)+i, j);
                 }
             }
         }
@@ -168,7 +168,7 @@ class Surface{
 		// fill screen white
 		for(int i=0; i < width; i++){
 			for(int j=0; j < height; j++){
-				UpdateSurfacePixel(i, j);
+				updateSurfacePixel(i, j);
 			}
 		}
 
@@ -177,7 +177,7 @@ class Surface{
 		// draw menu bar divider line
 		for(int i=0; i < width; i++){
 			for (int j = 0; j < menuSize; j++) {
-				UpdateSurfacePixel(i, (7*menuSize)+j);
+				updateSurfacePixel(i, (7*menuSize)+j);
 			}
 		}
 
@@ -355,7 +355,7 @@ class Surface{
 			auto change = actionQueue[actionQueuePos-1].queue;
 			foreach(pixelChange p; change) {
 				changeColor(p.color);
-				UpdateSurfacePixel(p.x, p.y);
+				updateSurfacePixel(p.x, p.y);
 			}
 			actionQueuePos--;
 			changeColor(color);
@@ -371,7 +371,7 @@ class Surface{
 			auto change = actionQueue[actionQueuePos].queue;
 			changeColor(actionQueue[actionQueuePos].nextColor);
 			foreach(pixelChange p; change) {
-				UpdateSurfacePixel(p.x, p.y);
+				updateSurfacePixel(p.x, p.y);
 			}
 			actionQueuePos++;
 			changeColor(color);
@@ -386,10 +386,10 @@ class Surface{
         for (int w=-size; w < size; w++){
             for (int h=-size; h < size; h++){
                 if (yPos+h >= menuSize*8 && yPos+h < height && xPos+w >= 0 && xPos+w < width){
-                    ubyte[] color = GetPixelColor(xPos+w,yPos+h);
+                    ubyte[] color = getPixelColor(xPos+w,yPos+h);
                     if (color[0] != r || color[1] != g || color[2] != b){
                         changes.insertBack(pixelChange(xPos+w,yPos+h,color));
-                        UpdateSurfacePixelHelper(xPos+w,yPos+h,r,g,b);
+                        updateSurfacePixelHelper(xPos+w,yPos+h,r,g,b);
                     }
                 }
             }
@@ -427,7 +427,7 @@ class Surface{
         for (int i=0; i < width; i++){
             for (int j=0; j < height-(menuSize*8); j++){
                 int pixelArrayPos = j*newSurface.pitch + i*newSurface.format.BytesPerPixel;
-                pixelArray[pixelArrayPos..pixelArrayPos+3] = GetPixelColor(i,j+(menuSize*8)).reverse;
+                pixelArray[pixelArrayPos..pixelArrayPos+3] = getPixelColor(i,j+(menuSize*8)).reverse;
             }
         }
         SDL_UnlockSurface(newSurface);
@@ -463,7 +463,7 @@ class Surface{
             for (int j=(menuSize*8); j < height; j++){
                 int pixelArrayPos = (j-(menuSize*8))*newImage.pitch + i*newImage.format.BytesPerPixel;
                 ubyte[] color = pixelArray[pixelArrayPos..pixelArrayPos+3].dup().reverse;
-                UpdateSurfacePixelHelper(i,j,color[0],color[1],color[2]);
+                updateSurfacePixelHelper(i,j,color[0],color[1],color[2]);
             }
         }
         return true;
