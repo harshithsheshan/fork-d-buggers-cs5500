@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Releasing the port from any previously running processes
+      run: lsof -t -i :50001 | xargs sudo kill
     - name: Install SDL
       run: sudo apt-get update && sudo apt-get install libsdl2-dev
     - uses: actions/checkout@v3
