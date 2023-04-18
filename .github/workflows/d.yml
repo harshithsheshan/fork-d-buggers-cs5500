@@ -19,9 +19,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Releasing the port from any previously running processes
-      run: lsof -t -i :50001 | xargs sudo kill
-    - name: Install SDL
+    - name: Step to install lsof
+      run: sudo apt-get update && sudo apt-get install -y lsof
+    - name: Step to kill any previously runnings processes on 50001 port
+      run: sudo lsof -t -i :50001 | xargs sudo kill
+    - name: Step to install SDL
       run: sudo apt-get update && sudo apt-get install libsdl2-dev
     - uses: actions/checkout@v3
     - uses: dlang-community/setup-dlang@4c99aa991ce7d19dd3064de0a4f2f6b2f152e2d7
