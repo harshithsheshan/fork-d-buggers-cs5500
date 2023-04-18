@@ -88,6 +88,7 @@ class Client{
         writeln("(",mSocket,")", buffer[0 .. received]);
         s = new Surface();
         v = new View(s);
+        this.run();
     }
 
     /**
@@ -98,6 +99,14 @@ class Client{
         mSocket.close();
         SDL_Quit();
         writeln("Ending application--good bye!");
+    }
+    /**
+    * This function returns the Socket object of the client.
+    *   Returns:
+    *       Socket = Socket assigned to the client.
+    */
+    Socket getSocket(){
+        return mSocket;
     }
 
     /**

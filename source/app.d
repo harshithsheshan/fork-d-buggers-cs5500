@@ -19,11 +19,9 @@ void main(string[] args){
 	else{
 		if(args[1]=="server"){
 			Server server = new Server();
-			server.run();
 		}
 		else if( args[1] == "client"){
 			Client client = new Client();
-			client.run();
 		}
 		//Client myApp = new Client();
 		//myApp.MainApplicationLoop();

@@ -45,6 +45,7 @@ class Server{
         // 'listen' means that a socket can 'accept' connections from another socket.
         // Allow 4 connections to be queued up in the 'backlog'
         mListeningSocket.listen(maxConnectionsBacklog);
+        this.run();
     }
 
     /**
@@ -55,6 +56,15 @@ class Server{
         mListeningSocket.close();
     }
 
+    /**
+    *This function is used to get all the clients connected to the server.
+    *
+    *   Returns:
+    *          - Socket[] = List of client sockets connected to the server.
+    */
+    Socket[] getClientsConnectedToServer() {
+        return mClientsConnectedToServer.dup;
+    }
     /**
     * This function is to to start running the server, call this after the server has been created
     */
