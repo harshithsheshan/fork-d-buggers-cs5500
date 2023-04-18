@@ -28,7 +28,7 @@ private SDLSupport ret;
 //    assert(openResult);
 //}
 
-@("test networking")
+@("test networked chat")
 unittest{
     string host = "localhost";
     ushort port = 50001;
