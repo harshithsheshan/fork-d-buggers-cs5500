@@ -6,6 +6,9 @@ import server:Server;
 import model:Surface;
 import loader = bindbc.loader.sharedlib;
 import std.stdio;
+import std.socket;
+import core.thread.osthread;
+
 
 private SDLSupport ret;
 
@@ -20,3 +23,36 @@ unittest{
     bool openResult = s.open("testFile");
     assert(openResult);
 }
+
+
+@("test networking")
+unittest{
+    //ret = loadSDL();
+    string host = "localhost";
+    ushort port = 50001;
+    Server server = new Server();
+    Socket clientS = new Socket(AddressFamily.INET, SocketType.STREAM);
+    clientS.connect(new InternetAddress(host, port));
+    auto newClientSocket = server.mListeningSocket.accept();
+    newClientSocket.send("Hello friend\0");
+    writeln("message sent");
+
+    char[80] buffer;
+    auto received = clientS.receive(buffer);
+    writeln(buffer[0 .. received]);
+
+    //clientS.close();
+    //server.mListeningSocket.close();
+    writeln("socket closed");
+
+    //server.mListeningSocket.close();
+    //serverthread.join();
+    //writeln("socket2 joined");
+//    serverthread.join();
+    //assert(true);
+}
+
+
+
+
+

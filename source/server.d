@@ -10,7 +10,7 @@ import core.thread.osthread;
 */
 class Server{
     // The listening socket is responsible for handling new client connections.
-    private Socket        mListeningSocket;
+    Socket        mListeningSocket;
 
     // Stores the clients that are currently connected to the server.
     private Socket[]    mClientsConnectedToServer;
