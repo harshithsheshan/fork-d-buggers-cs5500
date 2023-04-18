@@ -88,7 +88,6 @@ class Client{
         writeln("(",mSocket,")", buffer[0 .. received]);
         s = new Surface();
         v = new View(s);
-        this.run();
     }
 
     /**

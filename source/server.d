@@ -45,7 +45,6 @@ class Server{
         // 'listen' means that a socket can 'accept' connections from another socket.
         // Allow 4 connections to be queued up in the 'backlog'
         mListeningSocket.listen(maxConnectionsBacklog);
-        this.run();
     }
 
     /**
