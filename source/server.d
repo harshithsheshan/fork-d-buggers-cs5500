@@ -155,8 +155,9 @@ class Server{
             // After we receive a single message, we'll just
             // immedietely broadcast out to all clients some data.
             broadcastToAllClients();
-            return ;
+
         }
+        return ;
     }
 
 
