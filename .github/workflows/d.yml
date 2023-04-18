@@ -22,7 +22,7 @@ jobs:
     - name: Step to install lsof
       run: sudo apt-get update && sudo apt-get install -y lsof
     - name: Step to kill any previously runnings processes on 50001 port
-      run: sudo lsof -t -i :50001 | xargs sudo kill
+      run: sudo lsof -t -i :50001 | xargs sudo kill -15
     - name: Step to install SDL
       run: sudo apt-get update && sudo apt-get install libsdl2-dev
     - uses: actions/checkout@v3
