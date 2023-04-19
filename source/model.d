@@ -9,20 +9,26 @@ import std.string;
 import std.container : Array;
 import std.algorithm : reverse;
 
-/// struct that represents a single pixel change
+/**
+* Struct that represents a single pixel change.
+*/
 struct pixelChange {
 	int x;
 	int y;
 	ubyte[] color;
 }
 
-/// struct that represents a single action by the user from mouse down to mouse up
+/**
+* Struct that represents a single action by the user from mouse down to mouse up.
+*/
 struct action {
 	ubyte[] nextColor;
 	auto queue = Array!pixelChange();
 }
 
-/// Surface is the model class that model the canvas details like height, width, pixel values, brush size and related methods that help operate on model.
+/**
+* Surface is the model class that model the canvas details like height, width, pixel values, brush size and related methods that help operate on model.
+*/
 class Surface{
 
     private:
@@ -40,9 +46,14 @@ class Surface{
     auto actionQueue = Array!action();
     int actionQueuePos = 0;
 
-	/// contructor for the class
+    /**
+    * This is the surface constructor.
+    * Params:
+    *       height = the height of the surface
+    *       width = the width of the surface
+    */
     public:
-    this(int height = 530,int width = 745){
+    this(int height = 530, int width = 745){
         // Create a surface...
         this.width = width;
         this.height = height;
@@ -51,7 +62,9 @@ class Surface{
 
     }
 
-	/// contructor for the class
+	/**
+    * This is the surface destructor.
+    */
     ~this(){
         // Free a surface...
         SDL_FreeSurface(imgSurface);
