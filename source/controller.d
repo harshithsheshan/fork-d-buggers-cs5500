@@ -268,6 +268,7 @@ class Client{
             while(SDL_PollEvent(&e) !=0){
                 if (e.type == SDL_QUIT){
                     runApplication= false;
+                    stop();
                 }
                 else if (e.type == SDL_MOUSEBUTTONDOWN){
                     int xPos = e.button.x;
@@ -354,5 +355,11 @@ class Client{
             SDL_UpdateWindowSurface(v.window);
 
         }
+    }
+    /**
+    * To destroy the object when sdl window is closed.
+    */
+    void stop(){
+        this.destroy();
     }
 }
