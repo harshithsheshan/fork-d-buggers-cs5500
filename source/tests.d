@@ -39,8 +39,8 @@ unittest{
 @("test networked chat")
 unittest{
     string host = "localhost";
-    ushort port = 50001;
-    Server server = new Server();
+    ushort port = 50010;
+    Server server = new Server(host,port);
     Socket clientS = new Socket(AddressFamily.INET, SocketType.STREAM);
     clientS.connect(new InternetAddress(host, port));
     auto newClientSocket = server.mListeningSocket.accept();
@@ -61,8 +61,8 @@ unittest{
 @("testing instruction sent to client successfully")
 unittest{
     string host = "localhost";
-    ushort port = 50001;
-    Server server = new Server();
+    ushort port = 50011;
+    Server server = new Server(host,port);
     Socket clientS = new Socket(AddressFamily.INET, SocketType.STREAM);
     clientS.connect(new InternetAddress(host, port));
     auto newClientSocket = server.mListeningSocket.accept();
