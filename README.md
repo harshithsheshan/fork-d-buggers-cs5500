@@ -45,11 +45,14 @@ Once the app is open, user can the different functionalities in the menu section
 
 1. The first option from the left is to save any drawing. The image gets saved in BMP format.
 2. The second option from the left is to open any BMP format image and the user can continue drawing on it.
-3. The nedxt two options for the undo and redo features respectively. When multiple clients are working on the same canvas, a user can redo/undo only its own changes.
+3. The next two options for the undo and redo features respectively. When multiple clients are working on the same canvas, a user can redo/undo only its own changes.
 4. User can increase or descrease the brush size using the +/- options.
 5. User can also change the colors by clicking on any of the available color option in the menu.
 6. Also, users can chat with other clients using the terminal. We have network chat enabled so if the user send a message in the terminal, it gets broadcasted to the other clients along with the information on who sent it.
-7. We have also implemented networking so that multiple clients can work on the same drawing canvas simultaneously.
+7. We have also implemented networking so that multiple clients can work on the same drawing canvas simultaneously. The system is equiped to work with any number of clients. Below is an example with 3 clients.
+<img width="1440" alt="image" src="https://user-images.githubusercontent.com/16721521/233143690-b7f3ecb1-84c8-4800-ae15-be510fdd765c.png">
+
+
 
 
 As you see in the snapshot above, our app has a menu section that allows user to change brush color, bursh size
