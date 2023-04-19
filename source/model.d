@@ -58,52 +58,96 @@ class Surface{
 
     }
 
-    /// Helper function to retrieve the surface
+    /**
+    * This is a helper function to retrieve the surface.
+    * Returns:
+    *       SDL_Surface* = the surface
+    */
     auto getSurface(){
         return imgSurface;
     }
 
-    /// Helper function to retrieve the height of the surface
+    /**
+    * This is a helper function to retrieve the height of the surface.
+    * Returns:
+    *       int = the height of the surface
+    */
     auto getHeight(){
         return this.height;
     }
 
-    /// Helper function to retrieve the width of the surface
+    /**
+    * This is a helper function to retrieve the width of the surface.
+    * Returns:
+    *       int = the width of the surface
+    */
     auto getWidth(){
         return this.width;
     }
 
     /// Helper function to retrieve the relative number of pixels used to build the menu bar
+    /**
+    * This is a helper function to retrieve the relative number of pixels used to build the menu bar.
+    * Returns:
+    *       int = the relative number of pixels used to build the menu bar
+    */
     auto getMenuSize(){
         return menuSize;
     }
 
-    /// Helper function to retrieve the offsets between sections of the menu bar
+    /**
+    * This is a helper function to retrieve the offsets between sections of the menu bar.
+    * Returns:
+    *       int[] = the offsets between sections of the menu bar
+    */
     auto getMenuOffsets(){
         return offsetPos;
     }
 
-    /// Helper function to retrieve the color of one of the preset colors at a given index
+    /**
+    * This is a helper function to retrieve the color of one of the preset colors at a given index.
+    * Params:
+    *       idx = the index of the preset color to retrieve
+    *
+    * Returns:
+    *       ubyte[] = the color of the preset color at the given index
+    */
     auto getPresetColor(int idx){
         return presetColors[idx*3..(idx*3)+3];
     }
 
-    /// Helper function to retrieve the color the board is currently set to
+    /**
+    * This is a helper function to retrieve the color the board is currently set to.
+    * Returns:
+    *       ubyte[] = the color the board is currently set to
+    */
     auto GetSetColor(){
         return [red,green,blue];
     }
 
-    /// Helper function to retrieve the user's current brush size
+    /**
+    * This is a helper function to retrieve the user's current brush size.
+    * Returns:
+    *       int = the brush size
+    */
     auto getBrushSize(){
         return brushSize;
     }
 
-    /// Helper function to increase the brush size by 1
+    /**
+    * This is a helper function to increase the brush size by 1.
+    * Returns:
+    *       int = the new brush size
+    */
     int brushIncrease(){
         return brushSize++;
     }
 
-    /// Helper function to decrease the brush size by 1 if it is greater than 1
+    /**
+    * This is a helper function to decrease the brush size by 1 if it is greater than 1.
+    * Returns:
+    *       int = the new brush size
+    */
     int brushDecrease(){
         if (brushSize > 1){
             return brushSize--;
@@ -111,7 +155,15 @@ class Surface{
         return brushSize;
     }
 
-    /// Helper function to update a pixel value after it is provided expanded consitions
+    /**
+    * This is a helper function to update a pixel value after it is provided expanded consitions.
+    * Params:
+    *       xPos = x position of pixel
+    *       yPos = y position of pixel
+    *       r = red value of pixel
+    *       g = green value of pixel
+    *       b = blue value of pixel
+    */
     void updateSurfacePixelHelper(int xPos, int yPos, ubyte r, ubyte g, ubyte b) {
         SDL_LockSurface(imgSurface);
         ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
@@ -120,26 +172,45 @@ class Surface{
         SDL_UnlockSurface(imgSurface);
     }
 
-    /// Function to update a pixel value after it is provided a position and using the set color
+    /**
+    * This is a function to update a pixel value after it is provided a position and using the set color.
+    * Params:
+    *       xPos = x position of pixel
+    *       yPos = y position of pixel
+    */
     void updateSurfacePixel(int xPos, int yPos){
         updateSurfacePixelHelper(xPos,yPos,red,green,blue);
     }
 
-    /// Function to retrieve the color of a pixel at a given position
+    /**
+    * This is a function to retrieve the color of a pixel at a given position.
+    * Params:
+    *       xPos = x position of pixel
+    *       yPos = y position of pixel
+    *
+    * Returns:
+    *        ubyte[] = array of 3 ubyte values representing the color of the pixel
+    */
     auto getPixelColor(int xPos,int yPos){
         ubyte* pixelArray = cast(ubyte*)imgSurface.pixels;
         int pixelArrayPos = yPos*imgSurface.pitch + xPos*imgSurface.format.BytesPerPixel;
         return pixelArray[pixelArrayPos..pixelArrayPos+3].dup().reverse;
     }
 
-    /// Function to change the currently set color
+    /**
+    * This is a function to change the currently set color.
+    * Params:
+    *        color = the color to change to
+    */
     void changeColor(ubyte[] color){
         red = color[0];
         green = color[1];
         blue = color[2];
     }
 
-    /// Function that is used to create the initial design of the board GUI when it is initialized
+    /**
+    * This function is used to create the initial design of the board GUI when it is initialized.
+    */
     void drawMenu(){
 
         /// Helper function that is used to draw simple boxes for easy menu bar creation
@@ -343,8 +414,12 @@ class Surface{
 		changeColor([0,0,0]);
 	}
 
-    /// Function to undo the last action in the queue according to the current position in the queue
-	action undo(){
+    /**
+    * This is a function to undo the last action in the queue according to the current position in the queue.
+    * Returns:
+    *        action = an action struct that contains the action that was undone
+    */
+    action undo(){
 		if (actionQueuePos > 0){
             ubyte[] color = GetSetColor();
 			auto change = actionQueue[actionQueuePos-1].queue;
@@ -359,8 +434,12 @@ class Surface{
 		return action([0,0,0], Array!pixelChange());
 	}
 
-    /// Function to redo the next action in the queue according to the current position in the queue
-	action redo(){
+    /**
+    * This is a function to redo the next action in the queue according to the current position in the queue.
+    * Returns:
+    *        action = an action struct that contains the action that was redone
+    */
+    action redo(){
 		if (actionQueuePos < actionQueue.length){
             ubyte[] color = GetSetColor();
 			auto change = actionQueue[actionQueuePos].queue;
@@ -375,7 +454,18 @@ class Surface{
 		return action([0,0,0], Array!pixelChange());
 	}
 
-    /// Helper function to draw at a specific position with a specific color
+    /**
+    * This is a helper function to draw at a specific position with a specific color.
+    * Params:
+    *        xPos = x position of the pixel
+    *        yPos = y position of the pixel
+    *        r = red value of the color
+    *        g = green value of the color
+    *        b = blue value of the color
+    *
+    * Returns:
+    *        Array!pixelChange = an array of all the pixels that were changed and their original color
+    */
     auto drawHelper(int xPos, int yPos, ubyte r, ubyte g, ubyte b, int size){
         auto changes = Array!pixelChange();
         for (int w=-size; w < size; w++){
@@ -391,8 +481,14 @@ class Surface{
         }
 		return changes;
     }
-
-    // Function to draw at a specific position with the default color
+    
+    /**
+    * This is a function to draw at a specific position with the default color.
+    * Params:
+    *       xPos = x position of the pixel to be drawn
+    *       yPos = y position of the pixel to be drawn
+    *       mouseDown = true if this is drawing from a mousedown (start of action) else false
+    */
 	void draw(int xPos, int yPos, bool mouseDown){
 		if (mouseDown){
 			if (actionQueue.length > actionQueuePos){
