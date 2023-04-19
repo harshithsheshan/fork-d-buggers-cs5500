@@ -50,7 +50,7 @@ Once the app is open, user can the different functionalities in the menu section
 5. User can also change the colors by clicking on any of the available color option in the menu.
 6. Also, users can chat with other clients using the terminal. We have network chat enabled so if the user send a message in the terminal, it gets broadcasted to the other clients along with the information on who sent it.
 7. We have also implemented networking so that multiple clients can work on the same drawing canvas simultaneously. The system is equiped to work with any number of clients. Below is an example with 3 clients.
-<img width="1440" alt="image" src="https://user-images.githubusercontent.com/16721521/233143690-b7f3ecb1-84c8-4800-ae15-be510fdd765c.png">
+<img width="1440" alt="image" src="media/3clients.png">
 
 
 
