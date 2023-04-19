@@ -54,9 +54,6 @@ Once the app is open, user can the different functionalities in the menu section
 
 
 
-
-As you see in the snapshot above, our app has a menu section that allows user to change brush color, bursh size
-
 # Team spread sheet 
 
 - Your team members and project manager are listed on the following spreadsheet [here](https://docs.google.com/spreadsheets/d/1Z81Es6K-AAlTdzFNmQA32MbcQVekF6jEHnhKCKACF2w/edit?usp=sharing). 
