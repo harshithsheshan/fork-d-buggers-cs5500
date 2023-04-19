@@ -311,16 +311,13 @@ class Client{
                             }
                         }
                     } else {
+                        s.draw(xPos,yPos,!drawing);
                         drawing=true;
-                        s.draw(xPos,yPos,1);
                         auto rgb = s.GetSetColor();
                         auto brushSize = s.getBrushSize();
                         this.sendInsToServer(xPos,yPos,rgb,brushSize);
                     }
                 }else if (e.type == SDL_MOUSEBUTTONUP){
-                    if (drawing){
-                        s.posIncrease();
-                    }
                     drawing=false;
                 }else if (e.type == SDL_MOUSEMOTION && drawing){
                     // retrieve the position
@@ -329,7 +326,7 @@ class Client{
                     // Loop through and update specific pixels
                     // NOTE: No bounds checking performed --
                     //       think about how you might fix this :)
-                    s.draw(xPos,yPos,0);
+                    s.draw(xPos,yPos,!drawing);
                     auto rgb = s.GetSetColor();
                     auto brushSize = s.getBrushSize();
                     this.sendInsToServer(xPos,yPos,rgb,brushSize);

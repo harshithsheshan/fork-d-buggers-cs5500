@@ -111,11 +111,6 @@ class Surface{
         return brushSize;
     }
 
-    /// Helper function to increase the position in the undo/redo queue by 1
-    void posIncrease(){
-		actionQueuePos++;
-	}
-
     /// Helper function to update a pixel value after it is provided expanded consitions
     void updateSurfacePixelHelper(int xPos, int yPos, ubyte r, ubyte g, ubyte b) {
         SDL_LockSurface(imgSurface);
@@ -398,15 +393,16 @@ class Surface{
     }
 
     // Function to draw at a specific position with the default color
-	void draw(int xPos, int yPos, int mouseDown){
-		if (mouseDown == 1){
+	void draw(int xPos, int yPos, bool mouseDown){
+		if (mouseDown){
 			if (actionQueue.length > actionQueuePos){
 				actionQueue.removeBack(actionQueue.length-actionQueuePos);
 			}
 			actionQueue.insertBack(action([red, green, blue], Array!pixelChange()));
+            actionQueuePos++;
 		}
 		foreach(pixelChange p; drawHelper(xPos, yPos, red, green, blue, brushSize)) {
-			actionQueue[actionQueuePos].queue.insertBack(p);
+			actionQueue[actionQueuePos-1].queue.insertBack(p);
 		}
 	}
 

@@ -127,11 +127,11 @@ unittest{
     Surface s = new Surface();
 
     assert(s.getPixelColor(100, 200) == [255, 255, 255]);
-    s.draw(100, 200, 1);
+    s.draw(100, 200, true);
     assert(s.getPixelColor(100, 200) == [0, 0, 0]);
 
     assert(s.getPixelColor(300, 200) == [255, 255, 255]);
-    s.draw(300, 200, 0);
+    s.draw(300, 200, false);
     assert(s.getPixelColor(300, 200) == [0, 0, 0]);
 
     s.undo();
@@ -146,11 +146,11 @@ unittest{
     Surface s = new Surface();
 
     assert(s.getPixelColor(100, 200) == [255, 255, 255]);
-    s.draw(100, 200, 1);
+    s.draw(100, 200, true);
     assert(s.getPixelColor(100, 200) == [0, 0, 0]);
 
     assert(s.getPixelColor(300, 200) == [255, 255, 255]);
-    s.draw(300, 200, 1);
+    s.draw(300, 200, true);
     assert(s.getPixelColor(300, 200) == [0, 0, 0]);
 
     s.undo();
@@ -170,10 +170,10 @@ unittest{
     Surface s = new Surface();
 
     assert(s.getPixelColor(100, 200) == [255, 255, 255]);
-    s.draw(100, 200, 1);
+    s.draw(100, 200, true);
     assert(s.getPixelColor(100, 200) == [0, 0, 0]);
     s.changeColor([255, 0, 0]);
-    s.draw(100, 200, 1);
+    s.draw(100, 200, true);
     assert(s.getPixelColor(100, 200) == [255, 0, 0]);
 
     s.undo();
@@ -213,10 +213,10 @@ unittest{
     // Undo steps
 
     assert(s.getPixelColor(100, 200) == [255, 255, 255]);
-    s.draw(100, 200, 1);
+    s.draw(100, 200, true);
     assert(s.getPixelColor(100, 200) == [0, 0, 0]);
     s.changeColor([255, 0, 0]);
-    s.draw(100, 200, 1);
+    s.draw(100, 200, true);
     assert(s.getPixelColor(100, 200) == [255, 0, 0]);
 
     s.undo();
@@ -240,7 +240,7 @@ unittest{
 unittest{
     ret = loadSDL();
     Surface s = new Surface();
-    s.draw(100, 200, 1);
+    s.draw(100, 200, true);
     // Copy the value of every pixel in the surface
     auto pixels = Array!pixelChange();
     foreach (i; 0..s.getWidth()) {
@@ -264,7 +264,7 @@ unittest{
     // Check that a a brushSize x brushSize square is drawn
     int x = 100;
     int y = 200;
-    s.draw(x, y, 1);
+    s.draw(x, y, true);
     for (int w=-s.getBrushSize(); w < s.getBrushSize(); w++){
         assert(s.getPixelColor(x+w, y-s.getBrushSize()-1) == [255, 255, 255]);
         for (int h=-s.getBrushSize(); h < s.getBrushSize(); h++){
@@ -277,7 +277,7 @@ unittest{
 
     // Check that you can overwrite the square with a different color
     s.changeColor([255, 0, 0]);
-    s.draw(x, y, 1);
+    s.draw(x, y, true);
     for (int w=-s.getBrushSize(); w < s.getBrushSize(); w++){
         assert(s.getPixelColor(x+w, y-s.getBrushSize()-1) == [255, 255, 255]);
         for (int h=-s.getBrushSize(); h < s.getBrushSize(); h++){
@@ -293,7 +293,7 @@ unittest{
     s.changeColor([255, 0, 0]);
     x = 300;
     y = 400;
-    s.draw(x, y, 1);
+    s.draw(x, y, true);
     for (int w=-s.getBrushSize(); w < s.getBrushSize(); w++){
         assert(s.getPixelColor(x+w, y-s.getBrushSize()-1) == [255, 255, 255]);
         for (int h=-s.getBrushSize(); h < s.getBrushSize(); h++){
