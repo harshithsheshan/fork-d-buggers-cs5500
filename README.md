@@ -37,7 +37,7 @@ Team member Names:
 	``` dub run -- server```
 3. Open a new terminal, at the project root level, run command
 	``` dub run -- client```
-4. For every client, follow step 3
+4. For adding new clients, follow step 3
 
 ## How to use:
 Once the app is open, user can the different functionalities in the menu section to paint. Please refer the screenshot below:
