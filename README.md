@@ -22,15 +22,37 @@ https://youtu.be/F0XVOL1zQHM
 
 ## Team
 
-**Team Name**: *Edit this to your official team name*
+**Team Name**: *d-buggers*
 
 Team member Names:
 
 1. *Harshith Sheshan*
-2. *TODO my name is...*
-3. *TODO my name is...*
-4. *TODO my name is...*
-5. *TODO my name is...*
+2. *Harsh Hasmukh Parmar*
+3. *Sriyuth Sagi*
+
+## Setup steps:
+
+1. Clone this repository
+2. Open a terminal, at the project root level, run command
+	``` dub run -- server```
+3. Open a new terminal, at the project root level, run command
+	``` dub run -- client```
+4. For every client, follow step 3
+
+## How to use:
+Once the app is open, user can the different functionalities in the menu section to paint. Please refer the screenshot below:
+<img width="764" alt="image" src="https://user-images.githubusercontent.com/16721521/233140823-f5be4dfb-a366-49f7-a8ac-3e6e5e7d3557.png">
+
+1. The first option from the left is to save any drawing. The image gets saved in BMP format.
+2. The second option from the left is to open any BMP format image and the user can continue drawing on it.
+3. The nedxt two options for the undo and redo features respectively. When multiple clients are working on the same canvas, a user can redo/undo only its own changes.
+4. User can increase or descrease the brush size using the +/- options.
+5. User can also change the colors by clicking on any of the available color option in the menu.
+6. Also, users can chat with other clients using the terminal. We have network chat enabled so if the user send a message in the terminal, it gets broadcasted to the other clients along with the information on who sent it.
+7. We have also implemented networking so that multiple clients can work on the same drawing canvas simultaneously.
+
+
+As you see in the snapshot above, our app has a menu section that allows user to change brush color, bursh size
 
 # Team spread sheet 
 
